@@ -2,7 +2,13 @@
 
 ## 스마트 캐리어 (따라오는 캐리어 프로젝트)
 
-### 라즈베리파이 세팅
+#### 안드로이드 폰에서 라즈베리파이가 블루투스 목록에 뜨게 하는 과정
+https://github.com/hch0821/SmartCarrier/blob/master/raspi_bluetooth_settings.pdf  
+
+### 통신 테스트 방법
+
+#### 라즈베리파이 측
+
 ```
 sudo apt-get update
 sudo apt-get install python-pip3 python-dev ipython
@@ -10,14 +16,6 @@ sudo apt-get install python-pip3 python-dev ipython
 sudo apt-get install bluetooth libbluetooth-dev
 sudo pip3 install pybluez
 ```
-
-#### 안드로이드 폰에서 라즈베리파이가 블루투스 목록에 뜨게 하는 과정
-
-https://github.com/hch0821/SmartCarrier/blob/master/raspi_bluetooth_settings.pdf  
-
-### 통신 테스트 방법
-
-#### 라즈베리파이 측
 python bluetoothRpi.py 실행
 
 #### 안드로이드 측
