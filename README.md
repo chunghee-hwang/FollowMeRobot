@@ -11,6 +11,10 @@ sudo apt-get install bluetooth libbluetooth-dev
 sudo pip3 install pybluez
 ```
 
+#### 안드로이드 폰에서 라즈베리파이가 블루투스 목록에 뜨게 하는 과정
+
+https://github.com/hch0821/SmartCarrier/blob/master/raspi_bluetooth_settings.pdf  
+
 ### 통신 테스트 방법
 
 #### 라즈베리파이 측
