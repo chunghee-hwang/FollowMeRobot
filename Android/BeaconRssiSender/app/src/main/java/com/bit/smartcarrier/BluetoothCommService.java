@@ -38,7 +38,7 @@ public class BluetoothCommService extends Service {
     @Override
     public void onCreate()
     {
-        if (BluetoothAdapter.getDefaultAdapter() == null)
+        if (MainActivity.mBluetoothAdapter == null)
         {
             Toast.makeText(getApplicationContext(), "This device is not implement Bluetooth.", Toast.LENGTH_SHORT).show();
             return;
@@ -46,7 +46,7 @@ public class BluetoothCommService extends Service {
         init();
     }
 
-   	void init()
+    void init()
     {
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction("BluetoothCommService_RECEIVER");
@@ -60,7 +60,7 @@ public class BluetoothCommService extends Service {
                 if(intent.getAction() == null) return;
                 if(intent.getAction().equals("BluetoothCommService_RECEIVER"))
                 {
-                	// 사용자가 페어링된 장치중에 한 개를 선택했을 때의 인덱스를 받음
+                    // 사용자가 페어링된 장치중에 한 개를 선택했을 때의 인덱스를 받음
                     int selectedPairedDeviceIndex = intent.getIntExtra("selectedPairedDeviceIndex", -1);
                     if(selectedPairedDeviceIndex == -1)
                     {
@@ -68,14 +68,13 @@ public class BluetoothCommService extends Service {
                         return;
                     }
                     //현재 페어링된 장치 목록 가져옴.
-                    Set<BluetoothDevice> devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
+                    Set<BluetoothDevice> devices = MainActivity.mBluetoothAdapter.getBondedDevices();
                     final BluetoothDevice[] pairedDevices = devices.toArray(new BluetoothDevice[0]);
 
                     //라즈베리파이에 연결 시도하는 작업 시작
                     ConnectTask task = new ConnectTask(pairedDevices[selectedPairedDeviceIndex]);
                     task.execute();
                 }
-                //MainActivity에서 send버튼이 눌렸을 때 editText에 있는 String을 라즈베리파이에게 전송.
                 else if(intent.getAction().equals("BluetoothCommService_RECEIVER2"))
                 {
                     String msg = intent.getStringExtra("msg");
@@ -113,8 +112,11 @@ public class BluetoothCommService extends Service {
 
         private BluetoothSocket mBluetoothSocket = null;//블루투스 소켓
         private BluetoothDevice mBluetoothDevice = null;//연결된 블루투스 장치
-        private final int bluetooth_port = 2; //라즈베리파이의 파이썬 코드의 port번호와 동일해야함.
-        ConnectTask(BluetoothDevice bluetoothDevice) {
+        private final int bluetooth_port = 1; //라즈베리파이의 파이썬 코드의 port번호와 동일해야함.
+        private boolean initSuccess;
+        ConnectTask(BluetoothDevice bluetoothDevice)
+        {
+
             mBluetoothDevice = bluetoothDevice;
             mConnectedDeviceName = bluetoothDevice.getName();
             //SPP
@@ -133,7 +135,7 @@ public class BluetoothCommService extends Service {
         @Override
         protected Boolean doInBackground(Void... params) {
             // 블루투스 스캔을 멈춤
-            BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+            MainActivity.mBluetoothAdapter.cancelDiscovery();
 
             // 라즈베리파이에 연결을 시도함.
             try {
@@ -166,12 +168,12 @@ public class BluetoothCommService extends Service {
             }
         }
     }
-	//라즈베리파이와 성공적으로 연결됐다면 ConnectedTask 실행
+    //라즈베리파이와 성공적으로 연결됐다면 ConnectedTask 실행
     public void connected( BluetoothSocket socket ) {
         mConnectedTask = new ConnectedTask(socket);
         mConnectedTask.execute();
     }
-	//라즈베리파이와 String 값을 주고받는 작업을 하는 클래스
+    //라즈베리파이와 String 값을 주고받는 작업을 하는 클래스
     private class ConnectedTask extends AsyncTask<Void, String, Boolean>
     {
         private InputStream mInputStream;
@@ -182,7 +184,7 @@ public class BluetoothCommService extends Service {
         {
             mBluetoothSocket = socket;
             try {
-            	//String 주고 받을 스트림 생성
+                //String 주고 받을 스트림 생성
                 mInputStream = mBluetoothSocket.getInputStream();
                 mOutputStream = mBluetoothSocket.getOutputStream();
             } catch (IOException e) {
@@ -232,7 +234,7 @@ public class BluetoothCommService extends Service {
 
         }
 
-		//라즈베리파이로부터 메시지를 받았다면 MainActivity에게 받은 메시지값 전달
+        //라즈베리파이로부터 메시지를 받았다면 MainActivity에게 받은 메시지값 전달
         @Override
         protected void onProgressUpdate(String... recvMessage) {
             Intent intent = new Intent("MainActivity_RECEIVER3");
@@ -262,7 +264,7 @@ public class BluetoothCommService extends Service {
             closeSocket();
         }
 
-		//블루투스 소켓 닫기
+        //블루투스 소켓 닫기
         void closeSocket(){
 
             try {
@@ -295,14 +297,14 @@ public class BluetoothCommService extends Service {
     //MainActivity에게 현재 페어링된 장치 목록을 전달
     public void sendPairedDevicesList()
     {
-    	//현재 페어링된 장치 목록 가져옴.
-        Set<BluetoothDevice> devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
+        //현재 페어링된 장치 목록 가져옴.
+        Set<BluetoothDevice> devices = MainActivity.mBluetoothAdapter.getBondedDevices();
         String[] items;
 
         //Set --> 배열로 변환
         final BluetoothDevice[] pairedDevices = devices.toArray(new BluetoothDevice[0]);
         
-		//만약 페어링된 장치가 없다면
+        //만약 페어링된 장치가 없다면
         if ( pairedDevices.length == 0 ){
             Toast.makeText(getApplicationContext(), "No devices have been paired.\n"
                     +"You must pair it with another device.", Toast.LENGTH_SHORT).show();

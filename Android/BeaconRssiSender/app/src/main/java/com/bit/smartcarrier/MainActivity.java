@@ -1,5 +1,6 @@
 package com.bit.smartcarrier;
 
+
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -29,9 +30,9 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_GPS_ON = 300;
     private BroadcastReceiver mReceiver;
     private BroadcastReceiver mReceiver2;
+    static BluetoothAdapter mBluetoothAdapter;
     //통신 기록 텍스트뷰, 블루투스 장치 정보 텍스트뷰
     private TextView conversationText, bleTextVIew;
-
     //앱이 처음 실행될 때 수행됨
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -78,13 +79,13 @@ public class MainActivity extends AppCompatActivity {
     }
     //블루투스가 켜져있는지 확인하는 함수
     private boolean checkBluetooth() {
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "이 핸드폰은 블루투스를 지원하지 않습니다.", Toast.LENGTH_LONG).show();
             finish();
             return false;
             //블루투스가 꺼져있으면 켜도록 요청
-        } else if (!bluetoothAdapter.isEnabled()) {
+        } else if (!mBluetoothAdapter.isEnabled()) {
             startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), REQUEST_BLUETOOTH_ENABLE);
             return false;
         }
@@ -116,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
     //비콘 스캐너 초기화 함수
     void initBeaconScanService()
     {
+        /*
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction("MainActivity_RECEIVER");
         //BeaconScanService 클래스에서 인텐트로 비콘이름, 비콘주소, rssi값을 보내줬을 때 값을 받는 리시버.
@@ -137,7 +139,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, intentfilter);
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, intentfilter);*/
+
+        Thread t1 = new Thread(){
+            public void run(){
+                while(true) {
+                    final String msg = "time: " + BeaconScanService.curTimestamp + "rssi :" + String.format("%.2f", BeaconScanService.curRSSI) + "\n";
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            conversationText.append("Me: " + msg + "\n");
+                        }
+                    });
+
+                    sendMsgToBluetoothCommService(String.format("%.2f", BeaconScanService.curRSSI));
+                    try {
+                        Thread.sleep(500);
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        t1.setDaemon(true);
+        t1.start();
+
+
         startService(new Intent(getApplicationContext(), BeaconScanService.class));
     }
 
@@ -148,8 +176,8 @@ public class MainActivity extends AppCompatActivity {
         //블루투스 통신 백그라운드 동작을 멈춤
         stopService(new Intent(getApplicationContext(), BeaconScanService.class));
         stopService(new Intent(getApplicationContext(), BluetoothCommService.class));
-        if(mReceiver!=null)
-            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mReceiver);
+        //if(mReceiver!=null)
+        //    LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mReceiver);
         if(mReceiver2!= null)
             LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mReceiver2);
         super.onDestroy();
@@ -258,6 +286,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.create().show();
+
     }
     // -----------------------------------------------------------------------------------------
     // 블루투스 통신 코드 끝
