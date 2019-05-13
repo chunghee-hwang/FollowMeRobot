@@ -28,7 +28,7 @@ public class BluetoothCommService extends Service {
     private String mConnectedDeviceName = null; //연결된 장치 이름 
     static boolean isConnectionError = false;
     private static final String TAG = "BluetoothClient";
-
+    private BroadcastReceiver mReceiver;
     @Override
     public IBinder onBind(Intent intent)
     {
@@ -53,7 +53,7 @@ public class BluetoothCommService extends Service {
         intentfilter.addAction("BluetoothCommService_RECEIVER2");
         
         //BeaconDetector 클래스에서 sendBroadcast함수 호출시 해당 값을 받는 리시버
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent)
             {
@@ -88,7 +88,7 @@ public class BluetoothCommService extends Service {
         };
 
         //리시버 등록
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(receiver, intentfilter);
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, intentfilter);
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -103,6 +103,8 @@ public class BluetoothCommService extends Service {
         if ( mConnectedTask != null ) {
             mConnectedTask.cancel(true);
         }
+        if(mReceiver!=null)
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mReceiver);
     }
 
     //라즈베리파이와 통신하기위한 클래스 
@@ -111,7 +113,7 @@ public class BluetoothCommService extends Service {
 
         private BluetoothSocket mBluetoothSocket = null;//블루투스 소켓
         private BluetoothDevice mBluetoothDevice = null;//연결된 블루투스 장치
-        private final int bluetooth_port = 1; //라즈베리파이의 파이썬 코드의 port번호와 동일해야함.
+        private final int bluetooth_port = 2; //라즈베리파이의 파이썬 코드의 port번호와 동일해야함.
         ConnectTask(BluetoothDevice bluetoothDevice) {
             mBluetoothDevice = bluetoothDevice;
             mConnectedDeviceName = bluetoothDevice.getName();
@@ -192,20 +194,18 @@ public class BluetoothCommService extends Service {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            byte [] readBuffer = new byte[1024];
+            byte [] readBuffer = new byte[10];
             int readBufferPosition = 0;
-            while (true) {
+            while (true)
+            {
                 if ( isCancelled() ) return false;
                 try {
                     int bytesAvailable = mInputStream.available();
                     if(bytesAvailable > 0) {
-
                         byte[] packetBytes = new byte[bytesAvailable];
-
                         mInputStream.read(packetBytes);
 
                         for(int i=0;i<bytesAvailable;i++) {
-
                             byte b = packetBytes[i];
                             if(b == '\n')
                             {
