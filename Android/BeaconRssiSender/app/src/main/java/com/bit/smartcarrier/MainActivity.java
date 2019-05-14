@@ -19,8 +19,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,6 +52,43 @@ public class MainActivity extends AppCompatActivity {
         conversationText  = (TextView)findViewById(R.id.conversationText);
         bleTextVIew  = (TextView)findViewById(R.id.bleAddrText);
         requestGPSPerm(); //사용자에게 GPS 권한 요청
+        ToggleButton kalmanToggle = findViewById(R.id.kalmanToggle);
+        final EditText rssiThresholdEdit = findViewById(R.id.rssiThresholdEdit);
+        final Button rssiThresholdButton = findViewById(R.id.rssiThresholdButton);
+        Button scrollDownButton = findViewById(R.id.scrollDownButton);
+        final ScrollView conversationScroll = findViewById(R.id.conversationScroll);
+        scrollDownButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                conversationScroll.fullScroll(View.FOCUS_DOWN);
+            }
+        });
+
+        kalmanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Intent intent = new Intent("BeaconScanService_RECEIVER");
+                if(isChecked)
+                {
+                    intent.putExtra("kalmanOnOff", true);
+                }
+                else
+                {
+                    intent.putExtra("kalmanOnOff", false);
+                }
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+            }
+        });
+
+        rssiThresholdButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(rssiThresholdEdit.getText()== null || rssiThresholdEdit.getText().toString().equals(""))
+                    return;
+                double rssiThreshold = Double.parseDouble(rssiThresholdEdit.getText().toString());
+                sendMsgToBluetoothCommService("th" + rssiThreshold);
+            }
+        });
     }
 
     // -----------------------------------------------------------------------------------------

@@ -7,7 +7,11 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.icu.lang.UCharacter;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -23,10 +27,12 @@ import java.util.Vector;
 public class BeaconScanService extends Service
 {
     private Kalmanfilter mKalmanFilter; // 칼만필터
+    private boolean mKalmanOn;
     private SimpleDateFormat mSimpleDateFormat;
     private BluetoothLeScanner mBluetoothLeScanner;
     static double curRSSI;
     static String curTimestamp;
+    private BroadcastReceiver mReceiver;
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -37,9 +43,23 @@ public class BeaconScanService extends Service
     public void onCreate()
     {
         super.onCreate();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("BeaconScanService_RECEIVER");
         mKalmanFilter = new Kalmanfilter(0.0);
         mSimpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREAN);
         mBluetoothLeScanner = MainActivity.mBluetoothAdapter.getBluetoothLeScanner(); //비콘 탐지 스캐너
+        mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent)
+            {
+                if(intent.getAction() == null) return;
+                if(intent.getAction().equals("BeaconScanService_RECEIVER"))
+                {
+                    mKalmanOn = intent.getBooleanExtra("kalmanOnOff", false);
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, intentFilter);
     }
     private ScanCallback mScanCallback = new ScanCallback()
     {
@@ -48,24 +68,11 @@ public class BeaconScanService extends Service
         public void onScanResult(int callbackType, final ScanResult result)
         {
             super.onScanResult(callbackType, result);
-            final double filteredRssi = mKalmanFilter.update(result.getRssi()); //칼만 필터 사용해서 튀는 rssi값을 잡아줌.
-            curRSSI = result.getRssi();
+            if(mKalmanOn)
+                curRSSI = mKalmanFilter.update(result.getRssi()); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
+            else
+                curRSSI = result.getRssi();
             curTimestamp = mSimpleDateFormat.format(new Date());
-            /*
-            new Thread(new Runnable() {
-                @Override
-                public void run()
-                {
-                    Intent bleIntent = new Intent("MainActivity_RECEIVER");
-                    //bleIntent.putExtra("beacon_name", result.getDevice().getName());
-                    //bleIntent.putExtra("beacon_addr", result.getDevice().getAddress());
-                    //bleIntent.putExtra("beacon_timestamp", mSimpleDateFormat.format(new Date()));
-                    //bleIntent.putExtra("beacon_rssi", filteredRssi);
-                    //LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(bleIntent);
-
-                }
-            }).start();*/
-
         }
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
@@ -104,6 +111,8 @@ public class BeaconScanService extends Service
         super.onDestroy();
         if (mBluetoothLeScanner != null)
             mBluetoothLeScanner.stopScan(mScanCallback); //비콘 스캔 중지
+
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mReceiver);
     }
 }
 

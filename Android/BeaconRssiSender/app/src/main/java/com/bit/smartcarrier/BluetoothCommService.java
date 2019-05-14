@@ -196,7 +196,7 @@ public class BluetoothCommService extends Service {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            byte [] readBuffer = new byte[10];
+            byte [] readBuffer = new byte[1024];
             int readBufferPosition = 0;
             while (true)
             {
@@ -290,6 +290,7 @@ public class BluetoothCommService extends Service {
                 mOutputStream.flush();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during send", e );
+                stopSelf();
             }
         }
     }

@@ -10,9 +10,46 @@
         android:id="@+id/bleAddrText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+    <ToggleButton
+        android:id="@+id/kalmanToggle"
+        android:textOn="칼만필터 on"
+        android:textOff="칼만필터 off"
+        android:checked="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <EditText
+            android:id="@+id/rssiThresholdEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="rssi_threshold"
+            android:inputType="numberDecimal|numberSigned"
+            />
+        <Button
+            android:id="@+id/rssiThresholdButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="설정"
+            />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/scrollDownButton"
+        android:layout_gravity="right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="스크롤 맨 밑으로"
+        />
    <ScrollView
        android:layout_width="match_parent"
-       android:layout_height="match_parent">
+       android:layout_height="match_parent"
+       android:id="@+id/conversationScroll"
+       >
        <TextView
            android:id="@+id/conversationText"
            android:layout_width="match_parent"
