@@ -243,7 +243,6 @@ public class MainActivity extends AppCompatActivity {
     //블루투스 통신 백그라운드 작업 준비 및 시작
     private void initBluetoothService()
     {
-        Toast.makeText(getApplicationContext()," init bluetoothservice",Toast.LENGTH_SHORT).show();
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction("MainActivity_RECEIVER2");
         intentfilter.addAction("MainActivity_RECEIVER3");
