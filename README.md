@@ -3,7 +3,7 @@
 ## 스마트 캐리어 (따라오는 캐리어 프로젝트)
 
 #### 안드로이드 폰에서 라즈베리파이가 블루투스 목록에 뜨게 하는 과정
-https://github.com/hch0821/SmartCarrier/blob/master/raspi_bluetooth_settings.pdf  
+https://docs.google.com/document/d/1Bm8pNLWi0N6bJFj3h8M1D9kuVm6YiB5pHtsoO2CdqOs/edit?usp=sharing
 
 ### 통신 테스트 방법
 
