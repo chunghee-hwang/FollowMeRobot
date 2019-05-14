@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_BLUETOOTH_ENABLE = 200;
     private final int REQUEST_GPS_ON = 300;
     private BroadcastReceiver mReceiver;
-    private BroadcastReceiver mReceiver2;
     static BluetoothAdapter mBluetoothAdapter;
     //통신 기록 텍스트뷰, 블루투스 장치 정보 텍스트뷰
     private TextView conversationText, bleTextVIew;
@@ -113,11 +112,7 @@ public class MainActivity extends AppCompatActivity {
         boolean bluetoothOn = checkBluetooth();
         if (bluetoothOn) //블루투스가 켜져있으면
         {
-            boolean GPSon = checkGPS();
-            if (GPSon) //gps가 켜져있으면
-            {
-                initBluetoothService();
-            }
+            checkGPS();
         }
     }
     //블루투스가 켜져있는지 확인하는 함수
@@ -153,37 +148,15 @@ public class MainActivity extends AppCompatActivity {
         else
         {
             initBeaconScanService(); //비콘 감지 시작
+            initBluetoothService();
+            return true;
         }
-        return true;
+
     }
 
     //비콘 스캐너 초기화 함수
     void initBeaconScanService()
     {
-        /*
-        IntentFilter intentfilter = new IntentFilter();
-        intentfilter.addAction("MainActivity_RECEIVER");
-        //BeaconScanService 클래스에서 인텐트로 비콘이름, 비콘주소, rssi값을 보내줬을 때 값을 받는 리시버.
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent)
-            {
-                if(intent.getAction() != null && intent.getAction().equals("MainActivity_RECEIVER"))
-                {
-                    String name_addr = "";
-                    name_addr += "비콘이름: "+intent.getStringExtra("beacon_name")+"\n";
-                    name_addr += "비콘주소: "+intent.getStringExtra("beacon_addr") +"\n";
-                    String timeStamp = "["+ intent.getStringExtra("beacon_timestamp") +"]";
-                    double filteredRssi = intent.getDoubleExtra("beacon_rssi", 0.0);
-                    bleTextVIew.setText(name_addr);
-                    String msg = "time: "+timeStamp + "rssi :"+String.format("%.2f", filteredRssi)+"\n";
-                    conversationText.append("Me: " + msg+"\n");
-                    sendMsgToBluetoothCommService(String.format("%.2f", filteredRssi));
-                }
-            }
-        };
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, intentfilter);*/
-
         Thread t1 = new Thread(){
             public void run(){
                 while(true) {
@@ -219,10 +192,8 @@ public class MainActivity extends AppCompatActivity {
         //블루투스 통신 백그라운드 동작을 멈춤
         stopService(new Intent(getApplicationContext(), BeaconScanService.class));
         stopService(new Intent(getApplicationContext(), BluetoothCommService.class));
-        //if(mReceiver!=null)
-        //    LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mReceiver);
-        if(mReceiver2!= null)
-            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mReceiver2);
+        if(mReceiver != null)
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mReceiver);
         super.onDestroy();
     }
 
@@ -272,10 +243,11 @@ public class MainActivity extends AppCompatActivity {
     //블루투스 통신 백그라운드 작업 준비 및 시작
     private void initBluetoothService()
     {
+        Toast.makeText(getApplicationContext()," init bluetoothservice",Toast.LENGTH_SHORT).show();
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction("MainActivity_RECEIVER2");
         intentfilter.addAction("MainActivity_RECEIVER3");
-        mReceiver2 = new BroadcastReceiver() {
+        mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent)
             {
@@ -299,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver2, intentfilter);
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, intentfilter);
         
         //블루투스 통신 백그라운드 작업 시작
         startService(new Intent(getApplicationContext(), BluetoothCommService.class));
