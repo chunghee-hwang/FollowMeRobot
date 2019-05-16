@@ -3,11 +3,8 @@ package com.bit.smartcarrier;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.provider.Settings;
@@ -15,8 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -34,10 +29,12 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_GPS_PERM = 100;
     private final int REQUEST_BLUETOOTH_ENABLE = 200;
     private final int REQUEST_GPS_ON = 300;
-    private BroadcastReceiver mReceiver;
-    static BluetoothAdapter mBluetoothAdapter;
+    public BluetoothAdapter mBluetoothAdapter;
     //통신 기록 텍스트뷰, 블루투스 장치 정보 텍스트뷰
-    private TextView conversationText, bleTextVIew;
+    public TextView mConversationText;
+    private BluetoothComm mBluetoothComm;
+    private BeaconScanner mBeaconScanner;
+    private Thread rssiThread;
     //앱이 처음 실행될 때 수행됨
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -48,8 +45,8 @@ public class MainActivity extends AppCompatActivity {
     }
     private void init()
     {
-        conversationText  = (TextView)findViewById(R.id.conversationText);
-        bleTextVIew  = (TextView)findViewById(R.id.bleAddrText);
+        mConversationText = (TextView)findViewById(R.id.conversationText);
+        //bleTextVIew  = (TextView)findViewById(R.id.bleAddrText);
         requestGPSPerm(); //사용자에게 GPS 권한 요청
         ToggleButton kalmanToggle = findViewById(R.id.kalmanToggle);
         final EditText rssiThresholdEdit = findViewById(R.id.rssiThresholdEdit);
@@ -62,32 +59,24 @@ public class MainActivity extends AppCompatActivity {
                 conversationScroll.fullScroll(View.FOCUS_DOWN);
             }
         });
-
         kalmanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Intent intent = new Intent("BeaconScanService_RECEIVER");
-                if(isChecked)
-                {
-                    intent.putExtra("kalmanOnOff", true);
-                }
-                else
-                {
-                    intent.putExtra("kalmanOnOff", false);
-                }
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                mBeaconScanner.setKalmanOn(isChecked);
             }
         });
 
-        rssiThresholdButton.setOnClickListener(new View.OnClickListener() {
+        rssiThresholdButton.setOnClickListener(new View.OnClickListener()
+        {
             @Override
             public void onClick(View v) {
                 if(rssiThresholdEdit.getText()== null || rssiThresholdEdit.getText().toString().equals(""))
                     return;
                 double rssiThreshold = Double.parseDouble(rssiThresholdEdit.getText().toString());
-                sendMsgToBluetoothCommService("th" + rssiThreshold);
+                mBluetoothComm.sendMessage("th" + rssiThreshold);
             }
         });
+
     }
 
     // -----------------------------------------------------------------------------------------
@@ -147,53 +136,63 @@ public class MainActivity extends AppCompatActivity {
         //GPS가 이미 켜져있다면
         else
         {
-            initBeaconScanService(); //비콘 감지 시작
-            initBluetoothService();
+            initBeaconScanner(); //비콘 감지 시작
+            initBluetoothComm(); //라즈베리파이와 통신 시작
+            startRssiThread();
             return true;
         }
-
     }
 
     //비콘 스캐너 초기화 함수
-    void initBeaconScanService()
+    void initBeaconScanner()
     {
-        Thread t1 = new Thread(){
-            public void run(){
+        mBeaconScanner = new BeaconScanner(MainActivity.this);
+    }
+    void stopBeaconScanner()
+    {
+        if(mBeaconScanner!=null)
+            mBeaconScanner.stop();
+    }
+
+
+    private void startRssiThread()
+    {
+        rssiThread = new Thread()
+        {
+            @Override
+            public void run() {
                 while(true) {
-                    final String msg = "time: " + BeaconScanService.curTimestamp + "rssi :" + String.format("%.2f", BeaconScanService.curRSSI) + "\n";
+                    final double rssi = mBeaconScanner.getCurRssi();
+                    String timestamp = mBeaconScanner.getCurTImestamp();
+                    try
+                    {
+                        Thread.sleep(500);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            conversationText.append("Me: " + msg + "\n");
+                            mBluetoothComm.sendMessage(rssi+"");
                         }
                     });
 
-                    sendMsgToBluetoothCommService(String.format("%.2f", BeaconScanService.curRSSI));
-                    try {
-                        Thread.sleep(500);
-                    }
-                    catch (Exception e){
-                        e.printStackTrace();
-                    }
                 }
             }
         };
-        t1.setDaemon(true);
-        t1.start();
 
+        rssiThread.start();
 
-        startService(new Intent(getApplicationContext(), BeaconScanService.class));
     }
 
     //앱이 종료될때 호출되는 함수
     @Override
     protected void onDestroy() {
-        //비콘 감지 백그라운드 동작과
-        //블루투스 통신 백그라운드 동작을 멈춤
-        stopService(new Intent(getApplicationContext(), BeaconScanService.class));
-        stopService(new Intent(getApplicationContext(), BluetoothCommService.class));
-        if(mReceiver != null)
-            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mReceiver);
+        stopBeaconScanner();
+        stopBluetoothComm();
+
         super.onDestroy();
     }
 
@@ -214,7 +213,6 @@ public class MainActivity extends AppCompatActivity {
                     finish(); //exit(0);
                 }
             }
-
         }
     }
     @Override
@@ -227,7 +225,8 @@ public class MainActivity extends AppCompatActivity {
                 finish(); //exit(0);
             }
         } else if (requestCode == REQUEST_GPS_ON) { //GPS 설정창에서 이 앱으로 돌아왔을 경우
-            if (resultCode == RESULT_OK || resultCode == RESULT_CANCELED) {
+            if (resultCode == RESULT_OK || resultCode == RESULT_CANCELED)
+            {
                 checkGPS(); //gps 체크
             }
         }
@@ -240,68 +239,17 @@ public class MainActivity extends AppCompatActivity {
     // 블루투스 통신 코드
     // -----------------------------------------------------------------------------------------
     
-    //블루투스 통신 백그라운드 작업 준비 및 시작
-    private void initBluetoothService()
+    //블루투스 통신 작업 준비 및 시작
+    private void initBluetoothComm()
     {
-        IntentFilter intentfilter = new IntentFilter();
-        intentfilter.addAction("MainActivity_RECEIVER2");
-        intentfilter.addAction("MainActivity_RECEIVER3");
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent)
-            {
-                //BluetoothService 클래스에서 현재 페어링된 장치들을 받았다면
-                if(intent.getAction() == null) return;
-                if(intent.getAction().equals("MainActivity_RECEIVER2"))
-                {
-                    String []pairedDeviceNames = intent.getStringArrayExtra("pairedDevices");
-                    
-                    //페어링된 장치 목록을 창으로 띄움.
-                    if(pairedDeviceNames != null)
-                        showPairedDevicesListDialog(pairedDeviceNames);
-                    else
-                        Toast.makeText(getApplicationContext(), "Cannot receive the paired device!", Toast.LENGTH_SHORT).show();
-                }
-                else if(intent.getAction().equals("MainActivity_RECEIVER3"))
-                {
-                    String connectedDeviceName = intent.getStringExtra("connectedDeviceName");
-                    String recvMessage = intent.getStringExtra("recvMessage");
-                    conversationText.append(connectedDeviceName+":" + recvMessage+"\n");
-                }
-            }
-        };
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, intentfilter);
-        
-        //블루투스 통신 백그라운드 작업 시작
-        startService(new Intent(getApplicationContext(), BluetoothCommService.class));
+        mBluetoothComm = new BluetoothComm(MainActivity.this);
+    }
+    private void stopBluetoothComm()
+    {
+        if(mBluetoothComm != null)
+            mBluetoothComm.stop();
     }
 
-    //string 값을 BluetoothService 클래스에게 전달
-    private void sendMsgToBluetoothCommService(String msg)
-    {
-        Intent intent = new Intent("BluetoothCommService_RECEIVER2");
-        intent.putExtra("msg", msg);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-    }
-
-    //페어링된 장치 목록을 창으로 띄움.
-    private void showPairedDevicesListDialog(String []pairedDeviceNames)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("페어링된 장치중에 스마트캐리어가 무엇인가요?");
-        builder.setCancelable(false);
-        builder.setItems(pairedDeviceNames, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                Intent intent = new Intent("BluetoothCommService_RECEIVER");
-                intent.putExtra("selectedPairedDeviceIndex", which);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-            }
-        });
-        builder.create().show();
-
-    }
     // -----------------------------------------------------------------------------------------
     // 블루투스 통신 코드 끝
     // -----------------------------------------------------------------------------------------
