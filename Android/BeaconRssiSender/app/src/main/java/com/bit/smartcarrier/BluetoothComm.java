@@ -208,10 +208,16 @@ public class BluetoothComm {
 
             } catch (IOException e) {
                 Log.e(TAG, "Exception during send", e);
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mainActivity, "error : Server is down!", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-                Toast.makeText(mainActivity, "write error!", Toast.LENGTH_SHORT).show();
                 mainActivity.finish();
             }
+
         }
     }
 

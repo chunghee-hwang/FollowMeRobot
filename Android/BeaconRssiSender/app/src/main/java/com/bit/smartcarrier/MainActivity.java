@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     public TextView mConversationText;
     private BluetoothComm mBluetoothComm;
     private BeaconScanner mBeaconScanner;
-    private Thread rssiThread;
     //앱이 처음 실행될 때 수행됨
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -157,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean stopRssiThread = false;
     private void startRssiThread()
     {
+        Thread rssiThread;
         rssiThread = new Thread()
         {
 
