@@ -23,6 +23,7 @@ public class BeaconScanner {
     private MainActivity mainActivity;
     private double mCurRssi;
     private String mCurTimestamp;
+    private boolean isNewRssi;
     BeaconScanner(MainActivity m) {
         init(m);
     }
@@ -57,11 +58,16 @@ public class BeaconScanner {
     }
 
 
-    private ScanCallback mScanCallback = new ScanCallback() {
+    private ScanCallback mScanCallback = new ScanCallback()
+    {
         // 비콘을 스캔할 때 마다 이 콜백 호출됨.
+
         @Override
         public void onScanResult(int callbackType, final ScanResult result) {
             super.onScanResult(callbackType, result);
+
+            isNewRssi = true;
+
             if (mKalmanOn)
                 mCurRssi = mKalmanFilter.update(result.getRssi()); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
             else
@@ -89,6 +95,14 @@ public class BeaconScanner {
     public String getCurTImestamp()
     {
         return mCurTimestamp;
+    }
+    public boolean isNewRssi()
+    {
+        return isNewRssi;
+    }
+    public void setNewRssi(boolean newRssi)
+    {
+        this.isNewRssi = newRssi;
     }
 
 

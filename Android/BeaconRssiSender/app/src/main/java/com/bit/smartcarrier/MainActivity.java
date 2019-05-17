@@ -154,35 +154,33 @@ public class MainActivity extends AppCompatActivity {
             mBeaconScanner.stop();
     }
 
-
+    public boolean stopRssiThread = false;
     private void startRssiThread()
     {
         rssiThread = new Thread()
         {
+
             @Override
             public void run() {
-                while(true) {
-                    final double rssi = mBeaconScanner.getCurRssi();
-                    String timestamp = mBeaconScanner.getCurTImestamp();
+                while(!stopRssiThread) {
+                    if(!mBeaconScanner.isNewRssi())continue;
                     try
                     {
-                        Thread.sleep(500);
+                        Thread.sleep(100);
                     }
                     catch (Exception e)
                     {
                         e.printStackTrace();
                     }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mBluetoothComm.sendMessage(rssi+"");
-                        }
-                    });
+                    final double rssi = mBeaconScanner.getCurRssi();
+                    final String timestamp = mBeaconScanner.getCurTImestamp();
 
+                    mBluetoothComm.sendMessage(rssi+"");
+                    mBeaconScanner.setNewRssi(false);
                 }
             }
         };
-
+        rssiThread.setDaemon(true);
         rssiThread.start();
 
     }
@@ -192,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         stopBeaconScanner();
         stopBluetoothComm();
-
+        stopRssiThread=true;
         super.onDestroy();
     }
 

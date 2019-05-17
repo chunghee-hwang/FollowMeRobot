@@ -97,6 +97,7 @@ public class BluetoothComm {
     //라즈베리파이와 성공적으로 연결됐다면 ConnectedTask 실행
     private void connected(BluetoothSocket socket) {
         mConnectedTask = new ConnectedTask(socket);
+        Toast.makeText(mainActivity.getApplicationContext(), "connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
     }
 
     //라즈베리파이와 String 값을 주고받는 작업을 하는 클래스
@@ -104,7 +105,6 @@ public class BluetoothComm {
         private InputStream mInputStream;
         private OutputStream mOutputStream;
         private BluetoothSocket mBluetoothSocket;
-        private boolean connected = false;
 
         ConnectedTask(final BluetoothSocket socket) {
             new Thread() {
@@ -161,12 +161,7 @@ public class BluetoothComm {
         //라즈베리파이로부터 메시지를 받았다면 MainActivity에게 받은 메시지값 전달
         @Override
         protected void onProgressUpdate(String... recvMessage) {
-
             recvMessage(recvMessage[0]);
-            if (!connected) {
-                Toast.makeText(mainActivity.getApplicationContext(), "connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
-                connected = true;
-            }
         }
 
         @Override
@@ -241,7 +236,7 @@ public class BluetoothComm {
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
         builder.setTitle("페어링된 장치중에 스마트캐리어가 무엇인가요?");
-        builder.setCancelable(false);
+        //builder.setCancelable(false);
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -254,13 +249,19 @@ public class BluetoothComm {
     }
 
     //라즈베리파이에게 메시지를 전달하는 함수
-    void sendMessage(String msg) {
+    void sendMessage(final String msg) {
         if (mConnectedTask != null) {
             mConnectedTask.write(msg);
             Log.d(TAG, "send message: " + msg);
         }
-        if (mainActivity.mConversationText != null)
-            mainActivity.mConversationText.append("Android:" + msg + "\n");
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mainActivity.mConversationText != null)
+                    mainActivity.mConversationText.append("Android:" + msg + "\n");
+            }
+        });
+
     }
 
     private void recvMessage(String msg) {
