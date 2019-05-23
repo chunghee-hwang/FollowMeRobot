@@ -67,11 +67,10 @@ public class BeaconScanner {
             super.onScanResult(callbackType, result);
 
             isNewRssi = true;
-
+            mCurRssi = result.getRssi();
+            if(mCurRssi == 27) return;
             if (mKalmanOn)
-                mCurRssi = mKalmanFilter.update(result.getRssi()); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
-            else
-                mCurRssi = result.getRssi();
+                mCurRssi = mKalmanFilter.update(mCurRssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
             mCurTimestamp = mSimpleDateFormat.format(new Date());
         }
 

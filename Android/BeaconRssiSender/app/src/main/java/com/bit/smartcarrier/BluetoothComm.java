@@ -201,7 +201,7 @@ public class BluetoothComm {
         //write함수가 그 역할을 함
         void write(String msg) {
 
-            //msg += "\n";
+            msg += "\n";
             try {
                 mOutputStream.write(msg.getBytes());
                 mOutputStream.flush();
