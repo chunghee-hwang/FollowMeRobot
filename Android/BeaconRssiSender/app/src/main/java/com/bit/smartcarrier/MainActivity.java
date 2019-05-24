@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         {
             initBeaconScanner(); //비콘 감지 시작
             initBluetoothComm(); //라즈베리파이와 통신 시작
-            startRssiThread();
+            //startRssiThread();
             return true;
         }
     }
@@ -154,6 +154,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean stopRssiThread = false;
+    public void sendMessage(double rssi)
+    {
+        mBluetoothComm.sendMessage(rssi+"");
+    }
+
     private void startRssiThread()
     {
         Thread rssiThread;
@@ -163,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 while(!stopRssiThread) {
-                    if(!mBeaconScanner.isNewRssi())continue;
+                    //if(!mBeaconScanner.isNewRssi())continue;
                     try
                     {
                         Thread.sleep(100);
@@ -182,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
         };
         rssiThread.setDaemon(true);
         rssiThread.start();
-
     }
 
     //앱이 종료될때 호출되는 함수

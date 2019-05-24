@@ -75,6 +75,8 @@ public class BeaconScanner {
             else
                 mCurRssi =rssi;
             mCurTimestamp = mSimpleDateFormat.format(new Date());
+
+            mainActivity.sendMessage(mCurRssi);
         }
 
         @Override
