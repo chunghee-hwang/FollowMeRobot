@@ -11,7 +11,8 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener{
+public class MainActivity extends AppCompatActivity implements SensorEventListener
+{
     private ImageView imageView;
     private float[] mGravity = new float[3];
     private float[] mGeomagnetic = new float[3];
@@ -25,11 +26,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        imageView = (ImageView)findViewById(R.id.compass);
+        imageView = findViewById(R.id.compass);
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        mAngleText = (TextView)findViewById(R.id.angleText);
+        mAngleText = findViewById(R.id.angleText);
     }
-
     @Override
     protected void onPostResume() {
         super.onPostResume();
@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
 
     }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -48,9 +47,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onDestroy();
         mSensorManager.unregisterListener(this);
     }
-
     @Override
-    public void onSensorChanged(SensorEvent event) {
+    public void onSensorChanged(SensorEvent event)
+    {
         final float alpha = 0.97f;
         synchronized (this)
         {
@@ -89,9 +88,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }
     }
-
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 }

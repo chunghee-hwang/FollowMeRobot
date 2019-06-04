@@ -45,8 +45,8 @@ public class BeaconScanner {
         scanFilters.add(filter);
         //filter와 settings 기능을 사용할때 아래 코드 사용
         ScanSettings.Builder scanSettings = new ScanSettings.Builder();
-        scanSettings.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
-        scanSettings.setReportDelay(0);
+        scanSettings.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
+        //scanSettings.setReportDelay(0);
         scanSettings.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
         mBluetoothLeScanner.startScan(scanFilters, scanSettings.build(), mScanCallback);
         // filter와 settings 기능을 사용하지 않을 때는 아래 코드 사용
@@ -68,14 +68,14 @@ public class BeaconScanner {
 
             isNewRssi = true;
             int rssi = result.getRssi();
+
             if(rssi == 27) return;
 
             if (mKalmanOn)
                 mCurRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
             else
                 mCurRssi =rssi;
-            mCurTimestamp = mSimpleDateFormat.format(new Date());
-
+            //mCurTimestamp = mSimpleDateFormat.format(new Date());
             mainActivity.sendMessage(mCurRssi);
         }
 

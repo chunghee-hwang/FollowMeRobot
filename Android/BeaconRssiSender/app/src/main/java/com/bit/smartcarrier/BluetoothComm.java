@@ -26,7 +26,7 @@ public class BluetoothComm {
         init(m);
     }
 
-    void init(MainActivity m) {
+    private void init(MainActivity m) {
         this.mainActivity = m;
         showPairedDevicesDialog(); //MainActivity에 현재 페어링된 장치 목록 전달
     }
@@ -124,7 +124,7 @@ public class BluetoothComm {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            byte[] readBuffer = new byte[1024];
+            byte[] readBuffer = new byte[100];
             int readBufferPosition = 0;
             while (true) {
                 if (isCancelled()) return false;
@@ -211,7 +211,7 @@ public class BluetoothComm {
                 mainActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(mainActivity, "error : Server is down!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mainActivity, "eraror : Server is down!", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -256,7 +256,8 @@ public class BluetoothComm {
 
     //라즈베리파이에게 메시지를 전달하는 함수
     void sendMessage(final String msg) {
-        if (mConnectedTask != null) {
+        if (mConnectedTask != null)
+        {
             mConnectedTask.write(msg);
             Log.d(TAG, "send message: " + msg);
         }
@@ -267,10 +268,10 @@ public class BluetoothComm {
                     mainActivity.mConversationText.append("Android:" + msg + "\n");
             }
         });
-
     }
 
-    private void recvMessage(String msg) {
+    private void recvMessage(String msg)
+    {
         if (mConnectedDeviceName == null)
             mConnectedDeviceName = "N/A";
         mainActivity.mConversationText.append(mConnectedDeviceName + ": " + msg + "\n");

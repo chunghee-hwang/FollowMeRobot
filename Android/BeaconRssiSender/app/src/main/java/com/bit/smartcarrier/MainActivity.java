@@ -159,36 +159,6 @@ public class MainActivity extends AppCompatActivity {
         mBluetoothComm.sendMessage(rssi+"");
     }
 
-    private void startRssiThread()
-    {
-        Thread rssiThread;
-        rssiThread = new Thread()
-        {
-
-            @Override
-            public void run() {
-                while(!stopRssiThread) {
-                    //if(!mBeaconScanner.isNewRssi())continue;
-                    try
-                    {
-                        Thread.sleep(100);
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-                    final double rssi = mBeaconScanner.getCurRssi();
-                    final String timestamp = mBeaconScanner.getCurTImestamp();
-
-                    mBluetoothComm.sendMessage(rssi+"");
-                    mBeaconScanner.setNewRssi(false);
-                }
-            }
-        };
-        rssiThread.setDaemon(true);
-        rssiThread.start();
-    }
-
     //앱이 종료될때 호출되는 함수
     @Override
     protected void onDestroy() {
