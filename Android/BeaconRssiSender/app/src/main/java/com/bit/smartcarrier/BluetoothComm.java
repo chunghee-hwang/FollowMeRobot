@@ -184,7 +184,6 @@ public class BluetoothComm {
 
         //블루투스 소켓 닫기
         void closeSocket() {
-
             try {
 
                 mBluetoothSocket.close();

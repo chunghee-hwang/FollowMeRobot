@@ -48,7 +48,6 @@ public class BeaconScanner {
         scanFilters = new Vector<>();
         ScanFilter.Builder scanFilter = new ScanFilter.Builder();
         scanFilter.setDeviceAddress("C2:01:EC:00:05:C6"); //특정 MAC 주소를 가진 비콘만 검색
-        //scanFilter.setDeviceAddress("00:1A:7D:DA:71:13");
         ScanFilter filter = scanFilter.build();
         scanFilters.add(filter);
         //filter와 settings 기능을 사용할때 아래 코드 사용
@@ -68,16 +67,21 @@ public class BeaconScanner {
     }
 
 
+    //비콘이 폰으로 rssi값을 쐈을 때 값을 누적했다가 평균값을 취해서
+    //0.5초 간격으로
+    //라즈베리파이로 보냄
     private class RssiScanner extends ScanCallback
     //private ScanCallback mScanCallback = new ScanCallback()
     {
-        private ArrayList<Double> rssiBuffer = new ArrayList<Double>();
-        private double mIntervalTime;
+        private ArrayList<Double> rssiBuffer = new ArrayList<Double>(); //rssi값을 누적시키는 배열
+        private double mIntervalTime; //라즈베리로 rssi 평균값을 보내는 주기
 
         RssiScanner(double intervalTime)
         {
             this.mIntervalTime = intervalTime;
             mRssiSendTimer = new Timer();
+
+            //타이머를 써서 0.5초 간격으로 rssi 평균값을 라즈베리파이로 보냄
             TimerTask timerTask = new TimerTask()
             {
                 @Override
@@ -89,15 +93,14 @@ public class BeaconScanner {
                         rssiSum += rssi;
                     }
                     rssiSum /= (double)rssiBuffer.size();
-
-
                     mainActivity.sendMessage(rssiSum);
-
                     rssiBuffer.clear();
                 }
             };
             mRssiSendTimer.schedule(timerTask, (int)(mIntervalTime * 1000), (int)(mIntervalTime * 1000));
         }
+
+        //비콘에서 보낸 rssi를 받는 함수
         @Override
         public void onScanResult(int callbackType, final ScanResult result)
         {
@@ -110,14 +113,16 @@ public class BeaconScanner {
                 mCurRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
             else
                 mCurRssi = rssi;
-            rssiBuffer.add(mCurRssi);
+            rssiBuffer.add(mCurRssi); //비콘 값을 평균내기위해 배열에 추가
+
+            //화면에 rssi 배열 출력
             mainActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mainActivity.mConversationText.append(rssiBuffer.toString()+"\n");
                 }
             });
-            mCurTimestamp = mSimpleDateFormat.format(new Date());
+            //mCurTimestamp = mSimpleDateFormat.format(new Date());
             //mainActivity.sendMessage(mCurRssi);
         }
 
