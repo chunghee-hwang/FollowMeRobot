@@ -203,6 +203,7 @@ public class BluetoothComm {
 
             msg += "\n";
             try {
+
                 mOutputStream.write(msg.getBytes());
                 mOutputStream.flush();
 
@@ -211,7 +212,7 @@ public class BluetoothComm {
                 mainActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(mainActivity, "eraror : Server is down!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mainActivity, "error : Server is down!", Toast.LENGTH_SHORT).show();
                     }
                 });
 

@@ -38,13 +38,33 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/scrollDownButton"
-        android:layout_gravity="right"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="스크롤 맨 밑으로"
-        />
+        android:orientation="horizontal"
+        android:layout_gravity="right"
+        >
+        <ToggleButton
+            android:id="@+id/autoScrollToggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:textOn="자동스크롤 on"
+            android:textOff="자동스크롤 off"
+            />
+        <Button
+            android:id="@+id/scrollDownButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="스크롤 맨 밑으로"
+            />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
    <ScrollView
        android:layout_width="match_parent"
        android:layout_height="match_parent"
@@ -54,7 +74,7 @@
            android:id="@+id/conversationText"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
-           android:textSize="15sp"
+           android:textSize="24sp"
            />
    </ScrollView>
 

@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     public TextView mConversationText;
     private BluetoothComm mBluetoothComm;
     private BeaconScanner mBeaconScanner;
+    private ScrollView mConversationScroll;
+    private boolean isAutoScroll = true;
     //앱이 처음 실행될 때 수행됨
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -51,11 +54,20 @@ public class MainActivity extends AppCompatActivity {
         final EditText rssiThresholdEdit = findViewById(R.id.rssiThresholdEdit);
         final Button rssiThresholdButton = findViewById(R.id.rssiThresholdButton);
         Button scrollDownButton = findViewById(R.id.scrollDownButton);
-        final ScrollView conversationScroll = findViewById(R.id.conversationScroll);
-        scrollDownButton.setOnClickListener(new View.OnClickListener() {
+        mConversationScroll = findViewById(R.id.conversationScroll);
+        ToggleButton autoScrollToggle = findViewById(R.id.autoScrollToggle);
+        autoScrollToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isAutoScroll = isChecked;
+            }
+        });
+
+        scrollDownButton.setOnClickListener(new View.OnClickListener()
+        {
             @Override
             public void onClick(View v) {
-                conversationScroll.fullScroll(View.FOCUS_DOWN);
+                mConversationScroll.fullScroll(View.FOCUS_DOWN);
             }
         });
         kalmanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -154,9 +166,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean stopRssiThread = false;
-    public void sendMessage(double rssi)
+    public void sendMessage(Object rssi)
     {
-        mBluetoothComm.sendMessage(rssi+"");
+        mBluetoothComm.sendMessage(rssi.toString());
+        if(isAutoScroll) {
+            mConversationScroll.fullScroll(View.FOCUS_DOWN);
+        }
     }
 
     //앱이 종료될때 호출되는 함수

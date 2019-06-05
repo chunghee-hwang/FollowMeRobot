@@ -9,10 +9,16 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 //비콘 찾는것을 백그라운드에서 동작
 public class BeaconScanner {
@@ -22,6 +28,8 @@ public class BeaconScanner {
     private BluetoothLeScanner mBluetoothLeScanner;
     private MainActivity mainActivity;
     private double mCurRssi;
+    private RssiScanner mRssiscanner;
+    private Timer mRssiSendTimer;
     private String mCurTimestamp;
     private boolean isNewRssi;
     BeaconScanner(MainActivity m) {
@@ -45,42 +53,77 @@ public class BeaconScanner {
         scanFilters.add(filter);
         //filter와 settings 기능을 사용할때 아래 코드 사용
         ScanSettings.Builder scanSettings = new ScanSettings.Builder();
-        scanSettings.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
+        scanSettings.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
         //scanSettings.setReportDelay(0);
-        scanSettings.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
-        mBluetoothLeScanner.startScan(scanFilters, scanSettings.build(), mScanCallback);
+        //scanSettings.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
+        mRssiscanner = new RssiScanner(0.5);
+        mBluetoothLeScanner.startScan(scanFilters, scanSettings.build(), mRssiscanner);
         // filter와 settings 기능을 사용하지 않을 때는 아래 코드 사용
         //mBluetoothLeScanner.startScan(mScanCallback);
     }
 
-    void setKalmanOn(boolean onoff) {
+    void setKalmanOn(boolean onoff)
+    {
         mKalmanOn = onoff;
     }
 
 
-    private ScanCallback mScanCallback = new ScanCallback()
+    private class RssiScanner extends ScanCallback
+    //private ScanCallback mScanCallback = new ScanCallback()
     {
-        // 비콘을 스캔할 때 마다 이 콜백 호출됨.
+        private ArrayList<Double> rssiBuffer = new ArrayList<Double>();
+        private double mIntervalTime;
 
+        RssiScanner(double intervalTime)
+        {
+            this.mIntervalTime = intervalTime;
+            mRssiSendTimer = new Timer();
+            TimerTask timerTask = new TimerTask()
+            {
+                @Override
+                public void run() {
+
+                    if(rssiBuffer.isEmpty()) return;
+                    double rssiSum = 0;
+                    for(double rssi : rssiBuffer){
+                        rssiSum += rssi;
+                    }
+                    rssiSum /= (double)rssiBuffer.size();
+
+
+                    mainActivity.sendMessage(rssiSum);
+
+                    rssiBuffer.clear();
+                }
+            };
+            mRssiSendTimer.schedule(timerTask, (int)(mIntervalTime * 1000), (int)(mIntervalTime * 1000));
+        }
         @Override
-        public void onScanResult(int callbackType, final ScanResult result) {
+        public void onScanResult(int callbackType, final ScanResult result)
+        {
             super.onScanResult(callbackType, result);
-
-            isNewRssi = true;
+            //isNewRssi = true;
             int rssi = result.getRssi();
-
-            if(rssi == 27) return;
+            if(rssi > 0) return;
 
             if (mKalmanOn)
                 mCurRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
             else
-                mCurRssi =rssi;
-            //mCurTimestamp = mSimpleDateFormat.format(new Date());
-            mainActivity.sendMessage(mCurRssi);
+                mCurRssi = rssi;
+            rssiBuffer.add(mCurRssi);
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mainActivity.mConversationText.append(rssiBuffer.toString()+"\n");
+                }
+            });
+            mCurTimestamp = mSimpleDateFormat.format(new Date());
+            //mainActivity.sendMessage(mCurRssi);
         }
 
         @Override
-        public void onBatchScanResults(List<ScanResult> results) {
+        public void onBatchScanResults(List<ScanResult> results)
+        {
             super.onBatchScanResults(results);
             Log.d("onBatchScanResults", results.size() + "");
         }
@@ -90,31 +133,33 @@ public class BeaconScanner {
             super.onScanFailed(errorCode);
             Log.d("onScanFailed()", "errorCode: " + errorCode);
         }
-    };
+    }
 
-    public double getCurRssi()
-    {
-        return mCurRssi;
-    }
-    public String getCurTImestamp()
-    {
-        return mCurTimestamp;
-    }
-    public boolean isNewRssi()
-    {
-        return isNewRssi;
-    }
-    public void setNewRssi(boolean newRssi)
-    {
-        this.isNewRssi = newRssi;
-    }
+//    public double getCurRssi()
+//    {
+//        return mCurRssi;
+//    }
+//    public String getCurTImestamp()
+//    {
+//        return mCurTimestamp;
+//    }
+//    public boolean isNewRssi()
+//    {
+//        return isNewRssi;
+//    }
+//    public void setNewRssi(boolean newRssi)
+//    {
+//        this.isNewRssi = newRssi;
+//    }
 
 
 
     //비콘 스캔 작업 중지
     void stop() {
         if (mBluetoothLeScanner != null)
-            mBluetoothLeScanner.stopScan(mScanCallback); //비콘 스캔 중지
+            mBluetoothLeScanner.stopScan(mRssiscanner); //비콘 스캔 중지
+        if(mRssiSendTimer!=null)
+            mRssiSendTimer.cancel();
     }
 }
 
