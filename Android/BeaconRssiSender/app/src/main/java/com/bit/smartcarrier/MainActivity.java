@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private BeaconScanner mBeaconScanner;
     private ScrollView mConversationScroll;
     private boolean isAutoScroll = true;
+    private Compass mCompass;
     //앱이 처음 실행될 때 수행됨
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -149,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         {
             initBeaconScanner(); //비콘 감지 시작
             initBluetoothComm(); //라즈베리파이와 통신 시작
-            //startRssiThread();
+            initCompass(); //나침반 시작
             return true;
         }
     }
@@ -179,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         stopBeaconScanner();
         stopBluetoothComm();
+        stopCompass();
         stopRssiThread=true;
         super.onDestroy();
     }
@@ -241,4 +243,26 @@ public class MainActivity extends AppCompatActivity {
     // 블루투스 통신 코드 끝
     // -----------------------------------------------------------------------------------------
 
+
+    // -----------------------------------------------------------------------------------------
+    // 나침반 방향 관련 코드 시작
+    // -----------------------------------------------------------------------------------------
+
+    //나침반 작동 시작
+    private void initCompass()
+    {
+        if(mCompass == null) {
+            mCompass = new Compass(getApplicationContext(), this);
+            mCompass.start();
+        }
+    }
+
+    private void stopCompass()
+    {
+        if(mCompass != null)
+            mCompass.stop();
+    }
+    // -----------------------------------------------------------------------------------------
+    // 블루투스 통신 코드 끝
+    // -----------------------------------------------------------------------------------------
 }

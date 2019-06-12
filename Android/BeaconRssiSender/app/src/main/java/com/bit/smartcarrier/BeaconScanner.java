@@ -86,7 +86,6 @@ public class BeaconScanner {
             {
                 @Override
                 public void run() {
-
                     if(rssiBuffer.isEmpty()) return;
                     double rssiSum = 0;
                     for(double rssi : rssiBuffer){
