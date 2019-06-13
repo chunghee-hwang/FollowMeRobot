@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_GPS_ON = 300;
     public BluetoothAdapter mBluetoothAdapter;
     //통신 기록 텍스트뷰, 블루투스 장치 정보 텍스트뷰
-    public TextView mBasicApiRssiText, mMinewApiRssiText, mDirectionText;
+    public TextView mBasicApiRssiText, mMinewApiRssiText, mDirectionText, mTxPowerText;
     private BluetoothComm mBluetoothComm;
     private BeaconScanner mBeaconScanner;
     private BeaconScanner2 mBeaconScanner2;
@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        mTxPowerText = findViewById(R.id.txPowerText);
 
     }
 
@@ -211,7 +212,6 @@ public class MainActivity extends AppCompatActivity {
                         mMinewApiRssiText.setText("RSSI=" + String.format("%.2f", rssi)+"dBm");
                         break;
                 }
-
             }
         });
 
@@ -226,8 +226,17 @@ public class MainActivity extends AppCompatActivity {
                 mDirectionText.setText("direction="+direction+"");
             }
         });
-
     }
+    public void setTxPowerText(final int txPower)
+    {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mTxPowerText.setText("txPower="+txPower+"dBm");
+            }
+        });
+    }
+
 
     //앱이 종료될때 호출되는 함수
     @Override

@@ -19,10 +19,12 @@ public class BeaconScanner2 //비콘 살 때 준 코드로 돌리는 스캐너
     private Kalmanfilter mKalmanFilter; // 칼만필터
     private boolean mKalmanOn;
     private ArrayList<Double> rssiBuffer = new ArrayList<Double>(); //rssi값을 누적시키는 배열
+    private int mTxPower;
     private MinewBeaconManager mMinewBeaconManager;
     private Timer mRssiSendTimer;
     private boolean timerRunning;
     static final int MODE_MINEW_API = -1001;
+
 
     BeaconScanner2(MainActivity m)
     {
@@ -80,7 +82,7 @@ public class BeaconScanner2 //비콘 살 때 준 코드로 돌리는 스캐너
                     String mac = minewBeacon.getBeaconValue(BeaconValueIndex.MinewBeaconValueIndex_MAC).getStringValue();
                     int rssi = minewBeacon.getBeaconValue(BeaconValueIndex.MinewBeaconValueIndex_RSSI).getIntValue();
                     //int batterylevel = minewBeacon.getBeaconValue(BeaconValueIndex.MinewBeaconValueIndex_BatteryLevel).getIntValue();
-                    int txPower = minewBeacon.getBeaconValue(BeaconValueIndex.MinewBeaconValueIndex_TxPower).getIntValue();
+                    mTxPower = minewBeacon.getBeaconValue(BeaconValueIndex.MinewBeaconValueIndex_TxPower).getIntValue();
                     //float temperature = minewBeacon.getBeaconValue(BeaconValueIndex.MinewBeaconValueIndex_Temperature).getFloatValue();
                     if(!mac.equals("C2:01:EC:00:05:C6"))
                         continue;
@@ -134,6 +136,7 @@ public class BeaconScanner2 //비콘 살 때 준 코드로 돌리는 스캐너
                 }
                 rssiSum /= (double)rssiBuffer.size();
                 m.sendRssi(rssiSum, BeaconScanner2.MODE_MINEW_API);
+                m.setTxPowerText(mTxPower);
                 rssiBuffer.clear();
             }
         }, (int)(intervalTime*1000), (int)(intervalTime*1000));
