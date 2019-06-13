@@ -6,11 +6,17 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Compass implements SensorEventListener
 {
     private SensorManager mSensorManager;
     private MainActivity mainActivity;
     private int mDirect;
+    private Timer mDirectionTimer;
+    private boolean timerRunning;
+
     Compass(Context context, MainActivity mainActivity)
     {
         init(context, mainActivity);
@@ -19,15 +25,30 @@ public class Compass implements SensorEventListener
     {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         mainActivity = m;
+        mDirectionTimer = new Timer();
     }
 
-    public void start()
+    public void start(double intervalTime)
     {
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),SensorManager.SENSOR_DELAY_GAME);
+        if(mDirectionTimer==null) return;
+        mDirectionTimer.schedule(new TimerTask() {
+            @Override
+            public void run()
+            {
+                mainActivity.sendDirection(mDirect);
+            }
+        }, (int)(intervalTime * 1000), (int)(intervalTime * 1000));
+        timerRunning = true;
     }
     public void stop()
     {
         mSensorManager.unregisterListener(this);
+        if(mDirectionTimer!=null &&timerRunning)
+        {
+            mDirectionTimer.cancel();
+            timerRunning = false;
+        }
     }
 
 
@@ -69,7 +90,7 @@ public class Compass implements SensorEventListener
         else{
             mDirect = 7;
         }
-        mainActivity.sendDirection(mDirect);
+
     }
 
     @Override

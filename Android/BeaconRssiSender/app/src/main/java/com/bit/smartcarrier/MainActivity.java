@@ -306,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
     {
         if(mCompass == null) {
             mCompass = new Compass(getApplicationContext(), this);
-            mCompass.start();
+            mCompass.start(0.5);
         }
     }
 

@@ -67,8 +67,8 @@
             android:id="@+id/minewScanToggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOn="전용 api 스캐너 on"
-            android:textOff="전용 api 스캐너 off"
+            android:textOn="아이비콘 스캐너 on"
+            android:textOff="아이비콘 스캐너 off"
             />
         <TextView
             android:id="@+id/minewApiRssiText"
