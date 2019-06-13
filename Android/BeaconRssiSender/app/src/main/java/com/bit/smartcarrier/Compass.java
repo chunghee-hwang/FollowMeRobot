@@ -69,8 +69,7 @@ public class Compass implements SensorEventListener
         else{
             mDirect = 7;
         }
-        String de = Integer.toString(mDirect);
-        mainActivity.sendMessage(de);
+        mainActivity.sendDirection(mDirect);
     }
 
     @Override

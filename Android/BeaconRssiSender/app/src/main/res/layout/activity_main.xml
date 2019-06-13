@@ -38,44 +38,51 @@
 
     </LinearLayout>
 
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_gravity="right"
         >
         <ToggleButton
-            android:id="@+id/autoScrollToggle"
+            android:id="@+id/basicScanToggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:textOn="자동스크롤 on"
-            android:textOff="자동스크롤 off"
+            android:textOn="기본 api 스캐너 on"
+            android:textOff="기본 api 스캐너 off"
             />
-        <Button
-            android:id="@+id/scrollDownButton"
+        <TextView
+            android:id="@+id/basicApiRssiText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <ToggleButton
+            android:id="@+id/minewScanToggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="스크롤 맨 밑으로"
+            android:textOn="전용 api 스캐너 on"
+            android:textOff="전용 api 스캐너 off"
             />
-
+        <TextView
+            android:id="@+id/minewApiRssiText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            />
     </LinearLayout>
 
-
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-   <ScrollView
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       android:id="@+id/conversationScroll"
-       >
-       <TextView
-           android:id="@+id/conversationText"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:textSize="24sp"
-           />
-   </ScrollView>
+        android:id="@+id/directionText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        />
 
 </LinearLayout>

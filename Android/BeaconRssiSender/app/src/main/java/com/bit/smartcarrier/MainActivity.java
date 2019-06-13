@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,12 +33,13 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_GPS_ON = 300;
     public BluetoothAdapter mBluetoothAdapter;
     //통신 기록 텍스트뷰, 블루투스 장치 정보 텍스트뷰
-    public TextView mConversationText;
+    public TextView mBasicApiRssiText, mMinewApiRssiText, mDirectionText;
     private BluetoothComm mBluetoothComm;
     private BeaconScanner mBeaconScanner;
-    private ScrollView mConversationScroll;
-    private boolean isAutoScroll = true;
+    private BeaconScanner2 mBeaconScanner2;
     private Compass mCompass;
+
+
     //앱이 처음 실행될 때 수행됨
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -48,33 +50,19 @@ public class MainActivity extends AppCompatActivity {
     }
     private void init()
     {
-        mConversationText = (TextView)findViewById(R.id.conversationText);
         //bleTextVIew  = (TextView)findViewById(R.id.bleAddrText);
         requestGPSPerm(); //사용자에게 GPS 권한 요청
         ToggleButton kalmanToggle = findViewById(R.id.kalmanToggle);
         final EditText rssiThresholdEdit = findViewById(R.id.rssiThresholdEdit);
         final Button rssiThresholdButton = findViewById(R.id.rssiThresholdButton);
-        Button scrollDownButton = findViewById(R.id.scrollDownButton);
-        mConversationScroll = findViewById(R.id.conversationScroll);
-        ToggleButton autoScrollToggle = findViewById(R.id.autoScrollToggle);
-        autoScrollToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                isAutoScroll = isChecked;
-            }
-        });
-
-        scrollDownButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v) {
-                mConversationScroll.fullScroll(View.FOCUS_DOWN);
-            }
-        });
+        mDirectionText = findViewById(R.id.directionText);
+        mBasicApiRssiText = findViewById(R.id.basicApiRssiText);
+        mMinewApiRssiText = findViewById(R.id.minewApiRssiText);
         kalmanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mBeaconScanner.setKalmanOn(isChecked);
+                mBeaconScanner2.setKalmanOn(isChecked);
             }
         });
 
@@ -86,6 +74,29 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 double rssiThreshold = Double.parseDouble(rssiThresholdEdit.getText().toString());
                 mBluetoothComm.sendMessage("th" + rssiThreshold);
+            }
+        });
+
+        ToggleButton basicScanToggle = findViewById(R.id.basicScanToggle);
+        ToggleButton minewScanToggle = findViewById(R.id.minewScanToggle);
+        basicScanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked)
+                    startBeaconScanner();
+
+                else
+                    stopBeaconScanner();
+            }
+        });
+        minewScanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked)
+                    startBeaconScanner2();
+                else
+                    stopBeaconScanner2();
+
             }
         });
 
@@ -159,6 +170,18 @@ public class MainActivity extends AppCompatActivity {
     void initBeaconScanner()
     {
         mBeaconScanner = new BeaconScanner(MainActivity.this);
+        mBeaconScanner2 = new BeaconScanner2(MainActivity.this);
+    }
+
+    void startBeaconScanner()
+    {
+        if(mBeaconScanner != null)
+            mBeaconScanner.start();
+    }
+    void startBeaconScanner2()
+    {
+        if(mBeaconScanner2 != null)
+            mBeaconScanner2.start(MainActivity.this, 0.5);
     }
     void stopBeaconScanner()
     {
@@ -166,13 +189,44 @@ public class MainActivity extends AppCompatActivity {
             mBeaconScanner.stop();
     }
 
-    public boolean stopRssiThread = false;
-    public void sendMessage(Object rssi)
+    void stopBeaconScanner2()
     {
-        mBluetoothComm.sendMessage(rssi.toString());
-        if(isAutoScroll) {
-            mConversationScroll.fullScroll(View.FOCUS_DOWN);
-        }
+        if(mBeaconScanner2!=null)
+            mBeaconScanner2.stop();
+    }
+
+    public void sendRssi(final double rssi, final int mode)
+    {
+        mBluetoothComm.sendMessage(rssi+"");
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                switch (mode)
+                {
+                    case BeaconScanner.MODE_BASIC_API:
+                        mBasicApiRssiText.setText("RSSI=" + String.format("%.2f", rssi)+"dBm");
+                        break;
+                    case BeaconScanner2.MODE_MINEW_API:
+                        mMinewApiRssiText.setText("RSSI=" + String.format("%.2f", rssi)+"dBm");
+                        break;
+                }
+
+            }
+        });
+
+    }
+    public void sendDirection(final int direction)
+    {
+        mBluetoothComm.sendMessage(direction+"");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                mDirectionText.setText("direction="+direction+"");
+            }
+        });
+
     }
 
     //앱이 종료될때 호출되는 함수
@@ -181,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
         stopBeaconScanner();
         stopBluetoothComm();
         stopCompass();
-        stopRssiThread=true;
         super.onDestroy();
     }
 

@@ -261,19 +261,19 @@ public class BluetoothComm {
             mConnectedTask.write(msg);
             Log.d(TAG, "send message: " + msg);
         }
-        mainActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mainActivity.mConversationText != null)
-                    mainActivity.mConversationText.append("Android:" + msg + "\n");
-            }
-        });
+//        mainActivity.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (mainActivity.mConversationText != null)
+//                    mainActivity.mConversationText.append("Android:" + msg + "\n");
+//            }
+//        });
     }
 
     private void recvMessage(String msg)
     {
         if (mConnectedDeviceName == null)
             mConnectedDeviceName = "N/A";
-        mainActivity.mConversationText.append(mConnectedDeviceName + ": " + msg + "\n");
+//        mainActivity.mConversationText.append(mConnectedDeviceName + ": " + msg + "\n");
     }
 }

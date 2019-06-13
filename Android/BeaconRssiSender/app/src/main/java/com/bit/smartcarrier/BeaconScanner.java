@@ -8,6 +8,12 @@ import android.bluetooth.le.ScanSettings;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.minew.beacon.BeaconValueIndex;
+import com.minew.beacon.BluetoothState;
+import com.minew.beacon.MinewBeacon;
+import com.minew.beacon.MinewBeaconManager;
+import com.minew.beacon.MinewBeaconManagerListener;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,21 +35,22 @@ public class BeaconScanner {
     private MainActivity mainActivity;
     private double mCurRssi;
     private RssiScanner mRssiscanner;
-    private Timer mRssiSendTimer;
-    private String mCurTimestamp;
-    private boolean isNewRssi;
+    static final int MODE_BASIC_API = -1000;
+
     BeaconScanner(MainActivity m) {
         init(m);
     }
 
-
     //비콘 백그라운드 작업 생성시 호출
     public void init(MainActivity m) {
         this.mainActivity = m;
+        mRssiscanner = new RssiScanner(0.5);
         mKalmanFilter = new Kalmanfilter(0.0);
         mSimpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREAN);
         mBluetoothLeScanner = mainActivity.mBluetoothAdapter.getBluetoothLeScanner(); //비콘 탐지 스캐너
-
+    }
+    void start()
+    {
         List<ScanFilter> scanFilters;
         scanFilters = new Vector<>();
         ScanFilter.Builder scanFilter = new ScanFilter.Builder();
@@ -55,10 +62,25 @@ public class BeaconScanner {
         scanSettings.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
         //scanSettings.setReportDelay(0);
         //scanSettings.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
-        mRssiscanner = new RssiScanner(0.5);
         mBluetoothLeScanner.startScan(scanFilters, scanSettings.build(), mRssiscanner);
         // filter와 settings 기능을 사용하지 않을 때는 아래 코드 사용
         //mBluetoothLeScanner.startScan(mScanCallback);
+
+        mRssiscanner.startTimer();
+    }
+
+
+    //비콘 스캔 작업 중지
+    void stop()
+    {
+        if (mBluetoothLeScanner != null)
+            mBluetoothLeScanner.stopScan(mRssiscanner); //비콘 스캔 중지
+
+        if(mRssiscanner!=null)
+        {
+            mRssiscanner.stopTimer();
+        }
+
     }
 
     void setKalmanOn(boolean onoff)
@@ -73,12 +95,18 @@ public class BeaconScanner {
     private class RssiScanner extends ScanCallback
     //private ScanCallback mScanCallback = new ScanCallback()
     {
+        private Timer mRssiSendTimer;
         private ArrayList<Double> rssiBuffer = new ArrayList<Double>(); //rssi값을 누적시키는 배열
         private double mIntervalTime; //라즈베리로 rssi 평균값을 보내는 주기
-
+        private boolean timerRunning;
         RssiScanner(double intervalTime)
         {
             this.mIntervalTime = intervalTime;
+
+        }
+
+        private void startTimer()
+        {
             mRssiSendTimer = new Timer();
 
             //타이머를 써서 0.5초 간격으로 rssi 평균값을 라즈베리파이로 보냄
@@ -88,15 +116,29 @@ public class BeaconScanner {
                 public void run() {
                     if(rssiBuffer.isEmpty()) return;
                     double rssiSum = 0;
-                    for(double rssi : rssiBuffer){
-                        rssiSum += rssi;
+                    Iterator<Double> iter = rssiBuffer.iterator();
+                    while(iter.hasNext())
+                    {
+                        rssiSum += iter.next();
                     }
+//                    for(double rssi : rssiBuffer){
+//                        rssiSum += rssi;
+//                    }
                     rssiSum /= (double)rssiBuffer.size();
-                    mainActivity.sendMessage(rssiSum);
+                    mainActivity.sendRssi(rssiSum, BeaconScanner.MODE_BASIC_API);
                     rssiBuffer.clear();
                 }
             };
             mRssiSendTimer.schedule(timerTask, (int)(mIntervalTime * 1000), (int)(mIntervalTime * 1000));
+            timerRunning = true;
+        }
+
+        private void stopTimer()
+        {
+            if(mRssiSendTimer!=null && timerRunning) {
+                mRssiSendTimer.cancel();
+                timerRunning = false;
+            }
         }
 
         //비콘에서 보낸 rssi를 받는 함수
@@ -115,12 +157,12 @@ public class BeaconScanner {
             rssiBuffer.add(mCurRssi); //비콘 값을 평균내기위해 배열에 추가
 
             //화면에 rssi 배열 출력
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.mConversationText.append(rssiBuffer.toString()+"\n");
-                }
-            });
+//            mainActivity.runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    mainActivity.mConversationText.append(rssiBuffer.toString()+"\n");
+//                }
+//            });
             //mCurTimestamp = mSimpleDateFormat.format(new Date());
             //mainActivity.sendMessage(mCurRssi);
         }
@@ -139,31 +181,8 @@ public class BeaconScanner {
         }
     }
 
-//    public double getCurRssi()
-//    {
-//        return mCurRssi;
-//    }
-//    public String getCurTImestamp()
-//    {
-//        return mCurTimestamp;
-//    }
-//    public boolean isNewRssi()
-//    {
-//        return isNewRssi;
-//    }
-//    public void setNewRssi(boolean newRssi)
-//    {
-//        this.isNewRssi = newRssi;
-//    }
 
 
 
-    //비콘 스캔 작업 중지
-    void stop() {
-        if (mBluetoothLeScanner != null)
-            mBluetoothLeScanner.stopScan(mRssiscanner); //비콘 스캔 중지
-        if(mRssiSendTimer!=null)
-            mRssiSendTimer.cancel();
-    }
 }
 
