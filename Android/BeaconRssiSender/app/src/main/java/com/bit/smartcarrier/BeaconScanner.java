@@ -26,7 +26,7 @@ import java.util.Vector;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
-//비콘 찾는것을 백그라운드에서 동작
+//기본 안드로이드 비콘 스캐너 api
 public class BeaconScanner {
     private Kalmanfilter mKalmanFilter; // 칼만필터
     private boolean mKalmanOn;
@@ -121,9 +121,6 @@ public class BeaconScanner {
                     {
                         rssiSum += iter.next();
                     }
-//                    for(double rssi : rssiBuffer){
-//                        rssiSum += rssi;
-//                    }
                     rssiSum /= (double)rssiBuffer.size();
                     mainActivity.sendRssi(rssiSum, BeaconScanner.MODE_BASIC_API);
                     rssiBuffer.clear();

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class BeaconScanner2
+public class BeaconScanner2 //비콘 살 때 준 코드로 돌리는 스캐너
 {
     private Kalmanfilter mKalmanFilter; // 칼만필터
     private boolean mKalmanOn;
