@@ -58,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
         //bleTextVIew  = (TextView)findViewById(R.id.bleAddrText);
         requestGPSPerm(); //사용자에게 GPS 권한 요청
         ToggleButton kalmanToggle = findViewById(R.id.kalmanToggle);
+        ToggleButton basicScanToggle = findViewById(R.id.basicScanToggle);
+        ToggleButton minewScanToggle = findViewById(R.id.minewScanToggle);
+        ToggleButton compassToggle = findViewById(R.id.compassToggle);
         mRssiThresholdEdit = findViewById(R.id.rssiThresholdEdit);
         final Button rssiThresholdButton = findViewById(R.id.rssiThresholdButton);
         mDirectionText = findViewById(R.id.directionText);
@@ -95,8 +98,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ToggleButton basicScanToggle = findViewById(R.id.basicScanToggle);
-        ToggleButton minewScanToggle = findViewById(R.id.minewScanToggle);
+
         basicScanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -115,6 +117,15 @@ public class MainActivity extends AppCompatActivity {
                 else
                     stopBeaconScanner2();
 
+            }
+        });
+        compassToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked)
+                    startCompass();
+                else
+                    stopCompass();
             }
         });
 
@@ -177,9 +188,9 @@ public class MainActivity extends AppCompatActivity {
         //GPS가 이미 켜져있다면
         else
         {
-            initBeaconScanner(); //비콘 감지 시작
+            initBeaconScanner(); //비콘 감지 스캐너 초기화
+            initCompass(); //나침반 초기화
             initBluetoothComm(); //라즈베리파이와 통신 시작
-            initCompass(); //나침반 시작
             return true;
         }
     }
@@ -261,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         stopBeaconScanner();
+        stopBeaconScanner2();
         stopBluetoothComm();
         stopCompass();
         super.onDestroy();
@@ -333,13 +345,17 @@ public class MainActivity extends AppCompatActivity {
     // 나침반 방향 관련 코드 시작
     // -----------------------------------------------------------------------------------------
 
-    //나침반 작동 시작
+    //나침반 초기화
     private void initCompass()
     {
-        if(mCompass == null) {
-            mCompass = new Compass(getApplicationContext(), this);
-            mCompass.start(0.5);
-        }
+        mCompass = new Compass(getApplicationContext(), this);
+    }
+
+    //나침반 작동 시작
+    private void startCompass()
+    {
+       if(mCompass!=null)
+           mCompass.start(0.5);
     }
 
     private void stopCompass()

@@ -25,11 +25,11 @@ public class Compass implements SensorEventListener
     {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         mainActivity = m;
-        mDirectionTimer = new Timer();
     }
 
     public void start(double intervalTime)
     {
+        mDirectionTimer = new Timer();
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),SensorManager.SENSOR_DELAY_GAME);
         if(mDirectionTimer==null) return;
         mDirectionTimer.schedule(new TimerTask() {
