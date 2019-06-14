@@ -89,10 +89,11 @@ public class BeaconScanner {
         private ArrayList<Double> rssiBuffer = new ArrayList<Double>(); //rssi값을 누적시키는 배열
         private double mIntervalTime; //라즈베리로 rssi 평균값을 보내는 주기
         private boolean timerRunning;
+        private final double INIT_VAL = 9999;
+        private double prevRssi = INIT_VAL;
         RssiScanner(double intervalTime)
         {
             this.mIntervalTime = intervalTime;
-
         }
 
         private void startTimer()
@@ -107,6 +108,7 @@ public class BeaconScanner {
                     if(rssiBuffer.isEmpty()) return;
                     double rssiSum = 0;
                     Iterator<Double> iter = rssiBuffer.iterator();
+
                     while(iter.hasNext())
                     {
                         rssiSum += iter.next();
@@ -126,6 +128,7 @@ public class BeaconScanner {
                 mRssiSendTimer.cancel();
                 timerRunning = false;
             }
+            prevRssi = INIT_VAL;
         }
 
         //비콘에서 보낸 rssi를 받는 함수
@@ -135,23 +138,20 @@ public class BeaconScanner {
             super.onScanResult(callbackType, result);
             //isNewRssi = true;
             int rssi = result.getRssi();
-            if(rssi > 0) return;
-
-            if (mKalmanOn)
-                mCurRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
-            else
-                mCurRssi = rssi;
-            rssiBuffer.add(mCurRssi); //비콘 값을 평균내기위해 배열에 추가
-
-            //화면에 rssi 배열 출력
-//            m.runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    m.mConversationText.append(rssiBuffer.toString()+"\n");
-//                }
-//            });
-            //mCurTimestamp = mSimpleDateFormat.format(new Date());
-            //m.sendMessage(mCurRssi);
+            if(rssi < 0 || prevRssi == INIT_VAL)
+            {
+                //rssi가 튀는 것을 방지
+                if(prevRssi - 1 < rssi && rssi < prevRssi + 1)
+                {
+                    //칼만필터
+                    if (mKalmanOn)
+                        mCurRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
+                    else
+                        mCurRssi = rssi;
+                    rssiBuffer.add(mCurRssi); //비콘 값을 평균내기위해 배열에 추가
+                }
+            }
+            prevRssi = rssi;
         }
 
         @Override

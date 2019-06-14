@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 
 public class Commander
 {
-
     final static String GO ="GO";
     final static String STOP = "STOP";
 
@@ -18,6 +17,7 @@ public class Commander
     private int prevDirection = 0;
     private double prevSpeed = 35;
     private double rssiThreshold;
+
     Commander(MainActivity m){
         this.m = m;
 
@@ -28,14 +28,8 @@ public class Commander
 
     void updateRssi(double rssi)
     {
-        if(rssi < rssiThreshold)
-        {
-            if(!prevGoStop.equals(GO)) {
-                m.getBluetoothComm().sendMessage(GO);
-                prevGoStop = GO;
-            }
-        }
-        else if(rssi >= rssiThreshold)
+        final int delta = 5;
+        if(rssiThreshold <= rssi)
         {
             if(!prevGoStop.equals(STOP)) {
                 m.getBluetoothComm().sendMessage(STOP);
@@ -43,44 +37,51 @@ public class Commander
                 return;
             }
         }
-
-        if(rssiThreshold -10 < rssi  && rssi <= rssiThreshold)
+        else
         {
-            if(prevSpeed != 35)
+            if(!prevGoStop.equals(GO)) {
+                m.getBluetoothComm().sendMessage(GO);
+                prevGoStop = GO;
+            }
+        }
+
+        if(rssiThreshold - delta*2 <= rssi  && rssi < rssiThreshold - delta)
+        {
+            if(prevSpeed != 30)
             {
                 m.getBluetoothComm().sendMessage(SETSPEED+" "+35);
-                prevSpeed = 35;
+                prevSpeed = 30;
             }
         }
-        else if(rssiThreshold - 20 < rssi && rssi<= rssiThreshold-10)
+        else if(rssiThreshold - delta*3 <= rssi && rssi< rssiThreshold-delta*2)
         {
-            if(prevSpeed != 45)
+            if(prevSpeed != 40)
             {
                 m.getBluetoothComm().sendMessage(SETSPEED+" "+45);
-                prevSpeed = 45;
+                prevSpeed = 40;
             }
         }
-        else if(rssiThreshold - 30 < rssi && rssi <= rssiThreshold-20)
+        else if(rssiThreshold - delta*4 <= rssi && rssi < rssiThreshold - delta*3)
         {
-            if(prevSpeed != 55)
+            if(prevSpeed != 50)
             {
                 m.getBluetoothComm().sendMessage(SETSPEED+" "+55);
-                prevSpeed = 55;
+                prevSpeed = 50;
             }
         }
-        else if(rssiThreshold - 40 < rssi && rssi <= rssiThreshold - 30){
+        else if(rssiThreshold - delta*5 <= rssi && rssi < rssiThreshold - delta*4){
             if(prevSpeed != 65)
             {
                 m.getBluetoothComm().sendMessage(SETSPEED+" "+65);
                 prevSpeed = 65;
             }
         }
-        else if(rssi <= rssiThreshold - 40)
+        else if(rssi <= rssiThreshold - delta*5)
         {
-            if(prevSpeed != 70)
+            if(prevSpeed != 60)
             {
                 m.getBluetoothComm().sendMessage(SETSPEED+" "+70);
-                prevSpeed = 70;
+                prevSpeed = 60;
             }
         }
     }

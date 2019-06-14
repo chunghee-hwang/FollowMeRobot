@@ -23,6 +23,9 @@ public class BeaconScanner2 //비콘 살 때 준 코드로 돌리는 스캐너
     private MinewBeaconManager mMinewBeaconManager;
     private Timer mRssiSendTimer;
     private boolean timerRunning;
+    private final double INIT_VAL = 9999;
+    private double prevRssi = INIT_VAL;
+
     static final int MODE_MINEW_API = -1001;
 
 
@@ -87,13 +90,20 @@ public class BeaconScanner2 //비콘 살 때 준 코드로 돌리는 스캐너
                     if(!mac.equals("C2:01:EC:00:05:C6"))
                         continue;
                     double curRssi;
-                    if(rssi > 0) return;
-
-                    if (mKalmanOn)
-                        curRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
-                    else
-                        curRssi = rssi;
-                    rssiBuffer.add(curRssi); //비콘 값을 평균내기위해 배열에 추가
+                    if(rssi < 0 || prevRssi == INIT_VAL)
+                    {
+                        //rssi가 튀는 것을 방지
+                        if(prevRssi - 1 < rssi && rssi < prevRssi + 1)
+                        {
+                            //칼만필터
+                            if (mKalmanOn)
+                                curRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
+                            else
+                                curRssi = rssi;
+                            rssiBuffer.add(curRssi); //비콘 값을 평균내기위해 배열에 추가
+                        }
+                    }
+                    prevRssi = rssi;
                 }
             }
 
@@ -118,6 +128,7 @@ public class BeaconScanner2 //비콘 살 때 준 코드로 돌리는 스캐너
 
     void start(final MainActivity m, double intervalTime)
     {
+
         if(mMinewBeaconManager!=null)
             mMinewBeaconManager.startScan();
         else return;
@@ -152,6 +163,7 @@ public class BeaconScanner2 //비콘 살 때 준 코드로 돌리는 스캐너
             mRssiSendTimer.cancel();
             timerRunning = false;
         }
+        prevRssi = INIT_VAL;
 
     }
 

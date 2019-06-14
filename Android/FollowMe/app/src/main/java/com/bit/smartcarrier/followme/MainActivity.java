@@ -159,7 +159,8 @@ public class MainActivity extends AppCompatActivity {
     //블루투스가 켜져있는지 확인하는 함수
     private boolean checkBluetooth() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
+        if (mBluetoothAdapter == null)
+        {
             Toast.makeText(getApplicationContext(), "이 핸드폰은 블루투스를 지원하지 않습니다.", Toast.LENGTH_LONG).show();
             finish();
             return false;
@@ -345,12 +346,10 @@ public class MainActivity extends AppCompatActivity {
     // 나침반 방향 관련 코드 시작
     // -----------------------------------------------------------------------------------------
 
-    //나침반 초기화
     private void initCompass()
     {
         mCompass = new Compass(getApplicationContext(), this);
     }
-
     //나침반 작동 시작
     private void startCompass()
     {
