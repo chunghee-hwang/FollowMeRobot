@@ -79,3 +79,19 @@ def setMotor(ch, speed, stat):
     else:
         #pwmB는 핀 설정 후 pwm 핸들을 리턴 받은 값이다.
         setMotorContorl(pwmB, IN3, IN4, speed, stat)
+
+def goforward(speed):
+    setMotor(CH1, speed, FORWARD)
+    setMotor(CH2, speed, FORWARD)
+    
+def gobackward(speed):
+    setMotor(CH1, speed, BACKWARD)
+    setMotor(CH2, speed, BACKWARD)
+
+def turnleft(speed):
+    setMotor(CH1, speed, STOP)
+    setMotor(CH2, speed, FORWARD)
+    
+def turnright(speed):
+    setMotor(CH1, speed, FORWARD)
+    setMotor(CH2, speed, STOP)
