@@ -15,11 +15,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -28,7 +31,7 @@ import android.widget.ToggleButton;
 
 import java.text.ParseException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
 
     private final String TAG = "smartcarrier";
     private final int REQUEST_GPS_PERM = 100;
@@ -40,33 +43,31 @@ public class MainActivity extends AppCompatActivity {
     public EditText mRssiThresholdEdit;
     private BluetoothComm mBluetoothComm;
     private BeaconScanner mBeaconScanner;
-    private BeaconScanner2 mBeaconScanner2;
     private Compass mCompass;
     private Commander mCommander;
 
 
     //앱이 처음 실행될 때 수행됨
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();       //초기 설정
     }
-    private void init()
-    {
+
+    private void init() {
         //bleTextVIew  = (TextView)findViewById(R.id.bleAddrText);
         requestGPSPerm(); //사용자에게 GPS 권한 요청
-        ToggleButton kalmanToggle = findViewById(R.id.kalmanToggle);
-        ToggleButton basicScanToggle = findViewById(R.id.basicScanToggle);
-        ToggleButton minewScanToggle = findViewById(R.id.minewScanToggle);
-        ToggleButton compassToggle = findViewById(R.id.compassToggle);
+        final ToggleButton kalmanToggle = findViewById(R.id.kalmanToggle);
+        final ToggleButton basicScanToggle = findViewById(R.id.basicScanToggle);
+        //final ToggleButton minewScanToggle = findViewById(R.id.minewScanToggle);
+        final ToggleButton compassToggle = findViewById(R.id.compassToggle);
         mRssiThresholdEdit = findViewById(R.id.rssiThresholdEdit);
         final Button rssiThresholdButton = findViewById(R.id.rssiThresholdButton);
         mDirectionText = findViewById(R.id.directionText);
         mBasicApiRssiText = findViewById(R.id.basicApiRssiText);
-        mMinewApiRssiText = findViewById(R.id.minewApiRssiText);
-        mTxPowerText = findViewById(R.id.txPowerText);
+        //mMinewApiRssiText = findViewById(R.id.minewApiRssiText);
+        //mTxPowerText = findViewById(R.id.txPowerText);
         mCommandText = findViewById(R.id.commandText);
         mCommander = new Commander(MainActivity.this);
 
@@ -75,20 +76,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mBeaconScanner.setKalmanOn(isChecked);
-                mBeaconScanner2.setKalmanOn(isChecked);
             }
         });
 
-        rssiThresholdButton.setOnClickListener(new View.OnClickListener()
-        {
+        rssiThresholdButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mRssiThresholdEdit.getText()== null || mRssiThresholdEdit.getText().toString().equals(""))
+                if (mRssiThresholdEdit.getText() == null || mRssiThresholdEdit.getText().toString().equals(""))
                     return;
-                try {
+                try
+                {
                     double rssiThreshold = Double.parseDouble(mRssiThresholdEdit.getText().toString());
                     mCommander.setRssiThreshold(rssiThreshold);
-                    Toast.makeText(getApplicationContext(), "rssiThreshold:"+rssiThreshold, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "rssiThreshold:" + rssiThreshold, Toast.LENGTH_SHORT).show();
                 }
                 catch (Exception e)
                 {
@@ -102,32 +102,61 @@ public class MainActivity extends AppCompatActivity {
         basicScanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked)
+                if (isChecked)
                     startBeaconScanner();
 
                 else
                     stopBeaconScanner();
             }
         });
+        /*
         minewScanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked)
+                if (isChecked)
                     startBeaconScanner2();
                 else
                     stopBeaconScanner2();
 
             }
-        });
+        });*/
         compassToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked)
+                if (isChecked)
                     startCompass();
                 else
                     stopCompass();
             }
         });
+        RadioButton autoRadio = findViewById(R.id.autoRadio);
+        autoRadio.setChecked(true);
+        RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            LinearLayout mAutoLinear = (LinearLayout) findViewById(R.id.autoLinear);
+            LinearLayout mManualLinear = (LinearLayout) findViewById(R.id.manualLinear);
+
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.autoRadio:
+                        mManualLinear.setVisibility(View.GONE);
+                        mAutoLinear.setVisibility(View.VISIBLE);
+
+                        break;
+                    case R.id.manualRadio:
+                        kalmanToggle.setChecked(false);
+                        basicScanToggle.setChecked(false);
+                        //minewScanToggle.setChecked(false);
+                        compassToggle.setChecked(false);
+                        mAutoLinear.setVisibility(View.GONE);
+                        mManualLinear.setVisibility(View.VISIBLE);
+                        break;
+                }
+            }
+        });
+
+        initJoystick();
 
     }
 
@@ -156,11 +185,11 @@ public class MainActivity extends AppCompatActivity {
             checkGPS();
         }
     }
+
     //블루투스가 켜져있는지 확인하는 함수
     private boolean checkBluetooth() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null)
-        {
+        if (mBluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "이 핸드폰은 블루투스를 지원하지 않습니다.", Toast.LENGTH_LONG).show();
             finish();
             return false;
@@ -187,8 +216,7 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         //GPS가 이미 켜져있다면
-        else
-        {
+        else {
             initBeaconScanner(); //비콘 감지 스캐너 초기화
             initCompass(); //나침반 초기화
             initBluetoothComm(); //라즈베리파이와 통신 시작
@@ -197,73 +225,63 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //비콘 스캐너 초기화 함수
-    void initBeaconScanner()
-    {
+    void initBeaconScanner() {
         mBeaconScanner = new BeaconScanner(MainActivity.this);
-        mBeaconScanner2 = new BeaconScanner2(MainActivity.this);
     }
 
-    void startBeaconScanner()
-    {
-        if(mBeaconScanner != null)
+    void startBeaconScanner() {
+        if (mBeaconScanner != null)
             mBeaconScanner.start();
     }
-    void startBeaconScanner2()
-    {
-        if(mBeaconScanner2 != null)
-            mBeaconScanner2.start(MainActivity.this, 0.5);
+
+    void startBeaconScanner2() {
+        //if (mBeaconScanner2 != null)
+            //mBeaconScanner2.start(MainActivity.this, 0.5);
     }
-    void stopBeaconScanner()
-    {
-        if(mBeaconScanner!=null)
+
+    void stopBeaconScanner() {
+        if (mBeaconScanner != null)
             mBeaconScanner.stop();
     }
 
-    void stopBeaconScanner2()
-    {
-        if(mBeaconScanner2!=null)
-            mBeaconScanner2.stop();
+    void stopBeaconScanner2() {
+        //if (mBeaconScanner2 != null)
+           // mBeaconScanner2.stop();
     }
 
-    public void updateRssi(final double rssi, final int mode)
-    {
-
+    public void updateRssi(final double rssi, final int mode) {
         //mBluetoothComm.sendMessage(rssi+"");
         mCommander.updateRssi(rssi);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                switch (mode)
-                {
+                switch (mode) {
                     case BeaconScanner.MODE_BASIC_API:
-                        mBasicApiRssiText.setText("RSSI=" + String.format("%.2f", rssi)+"dBm");
-                        break;
-                    case BeaconScanner2.MODE_MINEW_API:
-                        mMinewApiRssiText.setText("RSSI=" + String.format("%.2f", rssi)+"dBm");
+                        mBasicApiRssiText.setText("RSSI=" + String.format("%.2f", rssi) + "dBm");
                         break;
                 }
             }
         });
 
     }
-    public void updateDirection(final int direction)
-    {
+
+    public void updateDirection(final int direction) {
         //mBluetoothComm.sendMessage(direction+"");
         mCommander.updateDirection(direction);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
-                mDirectionText.setText("direction="+direction+"");
+                mDirectionText.setText("direction=" + direction + "");
             }
         });
     }
-    public void setTxPowerText(final int txPower)
-    {
+
+    public void setTxPowerText(final int txPower) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mTxPowerText.setText("txPower="+txPower+"dBm");
+                mTxPowerText.setText("txPower=" + txPower + "dBm");
             }
         });
     }
@@ -282,8 +300,7 @@ public class MainActivity extends AppCompatActivity {
     //GPS 권한 요청 다이얼로그에서 허용 또는 거부 버튼이 눌렸을 때 호출되는 함수
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode)
-        {
+        switch (requestCode) {
             case REQUEST_GPS_PERM: {
                 //사용자가 gps 권한 요청을 수락했을 때
                 if (grantResults.length > 0
@@ -298,6 +315,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_BLUETOOTH_ENABLE) { //블루투스 설정창에서 이 앱으로 돌아왔을 경우
@@ -308,8 +326,7 @@ public class MainActivity extends AppCompatActivity {
                 finish(); //exit(0);
             }
         } else if (requestCode == REQUEST_GPS_ON) { //GPS 설정창에서 이 앱으로 돌아왔을 경우
-            if (resultCode == RESULT_OK || resultCode == RESULT_CANCELED)
-            {
+            if (resultCode == RESULT_OK || resultCode == RESULT_CANCELED) {
                 checkGPS(); //gps 체크
             }
         }
@@ -321,19 +338,18 @@ public class MainActivity extends AppCompatActivity {
     // -----------------------------------------------------------------------------------------
     // 블루투스 통신 코드
     // -----------------------------------------------------------------------------------------
-    
+
     //블루투스 통신 작업 준비 및 시작
-    private void initBluetoothComm()
-    {
+    private void initBluetoothComm() {
         mBluetoothComm = new BluetoothComm(MainActivity.this);
     }
-    private void stopBluetoothComm()
-    {
-        if(mBluetoothComm != null)
+
+    private void stopBluetoothComm() {
+        if (mBluetoothComm != null)
             mBluetoothComm.stop();
     }
-    public BluetoothComm getBluetoothComm()
-    {
+
+    public BluetoothComm getBluetoothComm() {
         return mBluetoothComm;
     }
 
@@ -346,23 +362,70 @@ public class MainActivity extends AppCompatActivity {
     // 나침반 방향 관련 코드 시작
     // -----------------------------------------------------------------------------------------
 
-    private void initCompass()
-    {
+    private void initCompass() {
         mCompass = new Compass(getApplicationContext(), this);
     }
+
     //나침반 작동 시작
-    private void startCompass()
-    {
-       if(mCompass!=null)
-           mCompass.start(0.5);
+    private void startCompass() {
+        if (mCompass != null)
+            mCompass.start(0.5);
     }
 
-    private void stopCompass()
-    {
-        if(mCompass != null)
+    private void stopCompass() {
+        if (mCompass != null)
             mCompass.stop();
     }
     // -----------------------------------------------------------------------------------------
     // 나침반 방향 관련 코드 끝
+    // -----------------------------------------------------------------------------------------
+
+
+    // -----------------------------------------------------------------------------------------
+    // 조이스틱 관련 코드 시작
+    // -----------------------------------------------------------------------------------------
+    private void initJoystick() {
+        Button upButton = findViewById(R.id.upButton);
+        Button downButton = findViewById(R.id.downButton);
+        Button leftButton = findViewById(R.id.leftButton);
+        Button rightButton = findViewById(R.id.rightButton);
+        upButton.setOnTouchListener(this);
+        leftButton.setOnTouchListener(this);
+        rightButton.setOnTouchListener(this);
+        downButton.setOnTouchListener(this);
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        int viewId = v.getId();
+        if (viewId == R.id.upButton || viewId == R.id.downButton || viewId == R.id.leftButton || viewId == R.id.rightButton) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    switch (viewId)
+                    {
+                        case R.id.upButton:
+                            mCommander.updateKey(Commander.UP);
+                            break;
+                        case R.id.downButton:
+                            mCommander.updateKey(Commander.DOWN);
+                            break;
+                        case R.id.leftButton:
+                            mCommander.updateKey(Commander.LEFT);
+                            break;
+                        case R.id.rightButton:
+                            mCommander.updateKey(Commander.RIGHT);
+                            break;
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mCommander.updateKey(Commander.STOP);
+                    break;
+            }
+        }
+
+        return true;
+    }
+// -----------------------------------------------------------------------------------------
+    // 조이스틱 관련 코드 끝
     // -----------------------------------------------------------------------------------------
 }

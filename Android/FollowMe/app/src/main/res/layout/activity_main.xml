@@ -6,83 +6,97 @@
     android:layout_gravity="center_horizontal"
     android:padding="10dp"
     >
-    <TextView
-        android:id="@+id/bleAddrText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <ToggleButton
-        android:id="@+id/kalmanToggle"
-        android:textOn="칼만필터 on"
-        android:textOff="칼만필터 off"
-        android:checked="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <LinearLayout
+    <RadioGroup
+        android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_gravity="center_horizontal"
         >
-        <EditText
-            android:id="@+id/rssiThresholdEdit"
+        <RadioButton
+            android:id="@+id/autoRadio"
+            android:text="자동 모드"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="rssi_threshold"
-            android:inputType="numberDecimal|numberSigned"
-            />
-        <Button
-            android:id="@+id/rssiThresholdButton"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:id="@+id/manualRadio"
+            android:text="수동 모드"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="설정"
-            />
-
-    </LinearLayout>
-
+            android:layout_height="wrap_content" />
+    </RadioGroup>
 
     <LinearLayout
+        android:id="@+id/autoLinear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         >
-        <ToggleButton
-            android:id="@+id/basicScanToggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textOn="기본 api 스캐너 on"
-            android:textOff="기본 api 스캐너 off"
-            />
         <TextView
-            android:id="@+id/basicApiRssiText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-        <ToggleButton
-            android:id="@+id/minewScanToggle"
+            android:id="@+id/bleAddrText"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textOn="아이비콘 스캐너 on"
-            android:textOff="아이비콘 스캐너 off"
-            />
+            android:layout_height="wrap_content" />
+        <ToggleButton
+            android:id="@+id/kalmanToggle"
+            android:textOn="칼만필터 on"
+            android:textOff="칼만필터 off"
+            android:checked="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             >
+            <EditText
+                android:id="@+id/rssiThresholdEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="rssi_threshold"
+                android:inputType="numberDecimal|numberSigned"
+                />
+            <Button
+                android:id="@+id/rssiThresholdButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="설정"
+                />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <ToggleButton
+                android:id="@+id/basicScanToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textOn="기본 api 스캐너 on"
+                android:textOff="기본 api 스캐너 off"
+                />
             <TextView
-                android:id="@+id/minewApiRssiText"
+                android:id="@+id/basicApiRssiText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
                 />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <ToggleButton
+                android:id="@+id/compassToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textOn="나침반 on"
+                android:textOff="나침반 off"
+                />
             <TextView
-                android:id="@+id/txPowerText"
+                android:id="@+id/directionText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
@@ -91,29 +105,45 @@
         </LinearLayout>
 
     </LinearLayout>
-
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/manualLinear"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_gravity="center"
         >
-        <ToggleButton
-            android:id="@+id/compassToggle"
+        <Button
+            android:id="@+id/upButton"
+            android:layout_gravity="center_horizontal"
+            android:text="▲"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOn="나침반 on"
-            android:textOff="나침반 off"
-            />
-        <TextView
-            android:id="@+id/directionText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            />
+            android:orientation="horizontal"
+            android:layout_gravity="center_horizontal"
+            >
+            <Button
+                android:id="@+id/leftButton"
+                android:text="◀"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/rightButton"
+                android:text="▶"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
+        <Button
+            android:id="@+id/downButton"
+            android:layout_gravity="center_horizontal"
+            android:text="▼"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
-
-
 
     <TextView
         android:layout_marginTop="20dp"
@@ -128,7 +158,6 @@
         android:background="#000000"/>
 
     <TextView
-
         android:layout_width="wrap_content"
         android:layout_height="100dp"
         android:id="@+id/commandText"

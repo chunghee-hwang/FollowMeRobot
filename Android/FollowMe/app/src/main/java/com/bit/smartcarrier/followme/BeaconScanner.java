@@ -39,12 +39,12 @@ public class BeaconScanner {
         mSimpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREAN);
         mBluetoothLeScanner = this.m.mBluetoothAdapter.getBluetoothLeScanner(); //비콘 탐지 스캐너
     }
-    void start()
-    {
+
+    void start() {
         List<ScanFilter> scanFilters;
         scanFilters = new Vector<>();
         ScanFilter.Builder scanFilter = new ScanFilter.Builder();
-        scanFilter.setDeviceAddress("C2:01:EC:00:05:C6"); //특정 MAC 주소를 가진 비콘만 검색
+        scanFilter.setDeviceAddress("FB:80:C9:EF:91:1F"); //특정 MAC 주소를 가진 비콘만 검색
         ScanFilter filter = scanFilter.build();
         scanFilters.add(filter);
         //filter와 settings 기능을 사용할때 아래 코드 사용
@@ -61,20 +61,17 @@ public class BeaconScanner {
 
 
     //비콘 스캔 작업 중지
-    void stop()
-    {
+    void stop() {
         if (mBluetoothLeScanner != null)
             mBluetoothLeScanner.stopScan(mRssiscanner); //비콘 스캔 중지
 
-        if(mRssiscanner!=null)
-        {
+        if (mRssiscanner != null) {
             mRssiscanner.stopTimer();
         }
 
     }
 
-    void setKalmanOn(boolean onoff)
-    {
+    void setKalmanOn(boolean onoff) {
         mKalmanOn = onoff;
     }
 
@@ -83,7 +80,7 @@ public class BeaconScanner {
     //0.5초 간격으로
     //라즈베리파이로 보냄
     private class RssiScanner extends ScanCallback
-    //private ScanCallback mScanCallback = new ScanCallback()
+            //private ScanCallback mScanCallback = new ScanCallback()
     {
         private Timer mRssiSendTimer;
         private ArrayList<Double> rssiBuffer = new ArrayList<Double>(); //rssi값을 누적시키는 배열
@@ -91,40 +88,36 @@ public class BeaconScanner {
         private boolean timerRunning;
         private final double INIT_VAL = 9999;
         private double prevRssi = INIT_VAL;
-        RssiScanner(double intervalTime)
-        {
+
+        RssiScanner(double intervalTime) {
             this.mIntervalTime = intervalTime;
         }
 
-        private void startTimer()
-        {
+        private void startTimer() {
             mRssiSendTimer = new Timer();
 
             //타이머를 써서 0.5초 간격으로 rssi 평균값을 라즈베리파이로 보냄
-            TimerTask timerTask = new TimerTask()
-            {
+            TimerTask timerTask = new TimerTask() {
                 @Override
                 public synchronized void run() {
-                    if(rssiBuffer.isEmpty()) return;
+                    if (rssiBuffer.isEmpty()) return;
                     double rssiSum = 0;
                     Iterator<Double> iter = rssiBuffer.iterator();
 
-                    while(iter.hasNext())
-                    {
+                    while (iter.hasNext()) {
                         rssiSum += iter.next();
                     }
-                    rssiSum /= (double)rssiBuffer.size();
+                    rssiSum /= (double) rssiBuffer.size();
                     m.updateRssi(rssiSum, MODE_BASIC_API);
                     rssiBuffer.clear();
                 }
             };
-            mRssiSendTimer.schedule(timerTask, (int)(mIntervalTime * 1000), (int)(mIntervalTime * 1000));
+            mRssiSendTimer.schedule(timerTask, (int) (mIntervalTime * 1000), (int) (mIntervalTime * 1000));
             timerRunning = true;
         }
 
-        private void stopTimer()
-        {
-            if(mRssiSendTimer!=null && timerRunning) {
+        private void stopTimer() {
+            if (mRssiSendTimer != null && timerRunning) {
                 mRssiSendTimer.cancel();
                 timerRunning = false;
             }
@@ -133,30 +126,31 @@ public class BeaconScanner {
 
         //비콘에서 보낸 rssi를 받는 함수
         @Override
-        public void onScanResult(int callbackType, final ScanResult result)
-        {
+        public void onScanResult(int callbackType, final ScanResult result) {
             super.onScanResult(callbackType, result);
             //isNewRssi = true;
             int rssi = result.getRssi();
-            if(rssi < 0 || prevRssi == INIT_VAL)
-            {
+            if (rssi < 0 || prevRssi == INIT_VAL) {
                 //rssi가 튀는 것을 방지
-                if(prevRssi - 1 < rssi && rssi < prevRssi + 1)
-                {
+                //if (prevRssi - 5 < rssi && rssi < prevRssi + 5) {
                     //칼만필터
-                    if (mKalmanOn)
+                    if (mKalmanOn) {
                         mCurRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
+
+
+
+
+                    }
                     else
                         mCurRssi = rssi;
                     rssiBuffer.add(mCurRssi); //비콘 값을 평균내기위해 배열에 추가
-                }
+                //}
             }
             prevRssi = rssi;
         }
 
         @Override
-        public void onBatchScanResults(List<ScanResult> results)
-        {
+        public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
             Log.d("onBatchScanResults", results.size() + "");
         }
@@ -167,8 +161,6 @@ public class BeaconScanner {
             Log.d("onScanFailed()", "errorCode: " + errorCode);
         }
     }
-
-
 
 
 }

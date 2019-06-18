@@ -11,6 +11,7 @@ import java.util.TimerTask;
 
 public class Compass implements SensorEventListener
 {
+
     private SensorManager mSensorManager;
     private MainActivity mainActivity;
     private int mDirect;
