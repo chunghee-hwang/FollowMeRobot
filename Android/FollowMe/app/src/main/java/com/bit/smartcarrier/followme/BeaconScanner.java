@@ -25,32 +25,33 @@ public class BeaconScanner {
     private MainActivity m;
     private double mCurRssi;
     private RssiScanner mRssiscanner;
-    static final int MODE_BASIC_API = -1000;
-
-    BeaconScanner(MainActivity m) {
-        init(m);
+    public final static String BEACON1 = "FB:80:C9:EF:91:1F"; //10314c
+    public final static String BEACON2 = "E4:59:B9:28:82:5E"; //85126e
+    private String mBeaconAddress;
+    BeaconScanner(MainActivity m, double intervalTime, String beaconAddress) {
+        init(m, intervalTime, beaconAddress);
     }
 
     //비콘 백그라운드 작업 생성시 호출
-    public void init(MainActivity m) {
+    public void init(MainActivity m, double intervalTime, String beaconAddress) {
         this.m = m;
-        mRssiscanner = new RssiScanner(0.5);
+        mRssiscanner = new RssiScanner(intervalTime);
         mKalmanFilter = new Kalmanfilter(0.0);
         mSimpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREAN);
         mBluetoothLeScanner = this.m.mBluetoothAdapter.getBluetoothLeScanner(); //비콘 탐지 스캐너
+        mBeaconAddress = beaconAddress;
     }
 
     void start() {
         List<ScanFilter> scanFilters;
         scanFilters = new Vector<>();
         ScanFilter.Builder scanFilter = new ScanFilter.Builder();
-        scanFilter.setDeviceAddress("FB:80:C9:EF:91:1F"); //특정 MAC 주소를 가진 비콘만 검색
+        scanFilter.setDeviceAddress(mBeaconAddress); //특정 MAC 주소를 가진 비콘만 검색
         ScanFilter filter = scanFilter.build();
         scanFilters.add(filter);
         //filter와 settings 기능을 사용할때 아래 코드 사용
         ScanSettings.Builder scanSettings = new ScanSettings.Builder();
-        scanSettings.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
-        //scanSettings.setReportDelay(0);
+        scanSettings.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
         //scanSettings.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
         mBluetoothLeScanner.startScan(scanFilters, scanSettings.build(), mRssiscanner);
         // filter와 settings 기능을 사용하지 않을 때는 아래 코드 사용
@@ -99,17 +100,20 @@ public class BeaconScanner {
             //타이머를 써서 0.5초 간격으로 rssi 평균값을 라즈베리파이로 보냄
             TimerTask timerTask = new TimerTask() {
                 @Override
-                public synchronized void run() {
-                    if (rssiBuffer.isEmpty()) return;
-                    double rssiSum = 0;
-                    Iterator<Double> iter = rssiBuffer.iterator();
+                public void run()
+                {
+//                    if (rssiBuffer.isEmpty()) return;
+//                    double rssiSum = 0;
+//                    Iterator<Double> iter = rssiBuffer.iterator();
+//
+//                    while (iter.hasNext()) {
+//                        rssiSum += iter.next();
+//                    }
+//                    rssiSum /= (double) rssiBuffer.size();
+//                    m.updateRssi(rssiSum, beaconAddress);
+                    m.updateRssi(mCurRssi, mBeaconAddress);
+//                    rssiBuffer.clear();
 
-                    while (iter.hasNext()) {
-                        rssiSum += iter.next();
-                    }
-                    rssiSum /= (double) rssiBuffer.size();
-                    m.updateRssi(rssiSum, MODE_BASIC_API);
-                    rssiBuffer.clear();
                 }
             };
             mRssiSendTimer.schedule(timerTask, (int) (mIntervalTime * 1000), (int) (mIntervalTime * 1000));
@@ -136,14 +140,10 @@ public class BeaconScanner {
                     //칼만필터
                     if (mKalmanOn) {
                         mCurRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
-
-
-
-
                     }
                     else
                         mCurRssi = rssi;
-                    rssiBuffer.add(mCurRssi); //비콘 값을 평균내기위해 배열에 추가
+                    //rssiBuffer.add(mCurRssi); //비콘 값을 평균내기위해 배열에 추가
                 //}
             }
             prevRssi = rssi;

@@ -39,10 +39,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private final int REQUEST_GPS_ON = 300;
     public BluetoothAdapter mBluetoothAdapter;
     //통신 기록 텍스트뷰, 블루투스 장치 정보 텍스트뷰
-    public TextView mBasicApiRssiText, mMinewApiRssiText, mDirectionText, mTxPowerText, mCommandText;
+    public TextView mRssiText1, mRssiText2, mDirectionText, mTxPowerText, mCommandText;
     public EditText mRssiThresholdEdit;
     private BluetoothComm mBluetoothComm;
-    private BeaconScanner mBeaconScanner;
+    private BeaconScanner mBeaconScanner, mBeaconScanner2;
     private Compass mCompass;
     private Commander mCommander;
 
@@ -60,14 +60,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         requestGPSPerm(); //사용자에게 GPS 권한 요청
         final ToggleButton kalmanToggle = findViewById(R.id.kalmanToggle);
         final ToggleButton basicScanToggle = findViewById(R.id.basicScanToggle);
-        //final ToggleButton minewScanToggle = findViewById(R.id.minewScanToggle);
         final ToggleButton compassToggle = findViewById(R.id.compassToggle);
         mRssiThresholdEdit = findViewById(R.id.rssiThresholdEdit);
         final Button rssiThresholdButton = findViewById(R.id.rssiThresholdButton);
         mDirectionText = findViewById(R.id.directionText);
-        mBasicApiRssiText = findViewById(R.id.basicApiRssiText);
-        //mMinewApiRssiText = findViewById(R.id.minewApiRssiText);
-        //mTxPowerText = findViewById(R.id.txPowerText);
+        mRssiText1 = findViewById(R.id.rssiText1);
+        mRssiText2 = findViewById(R.id.rssiText2);
         mCommandText = findViewById(R.id.commandText);
         mCommander = new Commander(MainActivity.this);
 
@@ -76,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mBeaconScanner.setKalmanOn(isChecked);
+                mBeaconScanner2.setKalmanOn(isChecked);
             }
         });
 
@@ -102,24 +101,16 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         basicScanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked)
+                if (isChecked) {
                     startBeaconScanner();
-
-                else
+                    startBeaconScanner2();
+                }
+                else {
                     stopBeaconScanner();
+                    stopBeaconScanner2();
+                }
             }
         });
-        /*
-        minewScanToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked)
-                    startBeaconScanner2();
-                else
-                    stopBeaconScanner2();
-
-            }
-        });*/
         compassToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -147,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     case R.id.manualRadio:
                         kalmanToggle.setChecked(false);
                         basicScanToggle.setChecked(false);
-                        //minewScanToggle.setChecked(false);
                         compassToggle.setChecked(false);
                         mAutoLinear.setVisibility(View.GONE);
                         mManualLinear.setVisibility(View.VISIBLE);
@@ -226,7 +216,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     //비콘 스캐너 초기화 함수
     void initBeaconScanner() {
-        mBeaconScanner = new BeaconScanner(MainActivity.this);
+        mBeaconScanner = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON1);
+        mBeaconScanner2 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON2);
     }
 
     void startBeaconScanner() {
@@ -234,9 +225,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             mBeaconScanner.start();
     }
 
-    void startBeaconScanner2() {
-        //if (mBeaconScanner2 != null)
-            //mBeaconScanner2.start(MainActivity.this, 0.5);
+    void startBeaconScanner2()
+    {
+        if (mBeaconScanner2 != null)
+            mBeaconScanner2.start();
     }
 
     void stopBeaconScanner() {
@@ -245,21 +237,24 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     }
 
     void stopBeaconScanner2() {
-        //if (mBeaconScanner2 != null)
-           // mBeaconScanner2.stop();
+        if (mBeaconScanner2 != null)
+           mBeaconScanner2.stop();
     }
 
-    public void updateRssi(final double rssi, final int mode) {
-        //mBluetoothComm.sendMessage(rssi+"");
-        mCommander.updateRssi(rssi);
+    public void updateRssi(final double rssi, final String beaconAddress) {
+        mCommander.updateRssi(rssi, beaconAddress);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                switch (mode) {
-                    case BeaconScanner.MODE_BASIC_API:
-                        mBasicApiRssiText.setText("RSSI=" + String.format("%.2f", rssi) + "dBm");
+                switch (beaconAddress) {
+                    case BeaconScanner.BEACON1:
+                        mRssiText1.setText("RSSI1=" + String.format("%.2f", rssi) + "dBm");
+                        break;
+                    case BeaconScanner.BEACON2:
+                        mRssiText2.setText("RSSI2=" + String.format("%.2f", rssi) + "dBm");
                         break;
                 }
+
             }
         });
 
