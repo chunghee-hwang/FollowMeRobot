@@ -25,9 +25,50 @@ public class BeaconScanner {
     private MainActivity m;
     private double mCurRssi;
     private RssiScanner mRssiscanner;
-    public final static String BEACON1 = "FB:80:C9:EF:91:1F"; //10314c
-    public final static String BEACON2 = "E4:59:B9:28:82:5E"; //85126e
+    public final static String BEACON1 = "FB:80:C9:EF:91:1F";
+    public final static String BEACON2 = "E4:59:B9:28:82:5E";
+    public final static String BEACON3 = "D5:97:0B:88:B7:82";
+    public final static String BEACON4 = "CF:F3:09:3A:AD:36";
+    public final static String BEACON5 = "F1:F4:BE:EA:B3:59";
+
+    /*
+    estimote 비콘 정보
+    ------------------
+    비콘번호
+    identifier
+    MAC 주소
+    uuid
+    ------------------
+    1
+    10314c454232737e2c417e30408de402
+    FB:80:C9:EF:91:1F
+    0000FE9A-0000-1000-8000-00805F9B34FB
+    ------------------
+    2
+    85126e18b4e65d280ec93effb3a8df0a
+    E4:59:B9:28:82:5E
+    0000FE9A-0000-1000-8000-00805F9B34FB
+    ------------------
+    3
+    1aeac34b6aae6eae705ef9cd98e57121
+    D5:97:0B:88:B7:82
+    0000FE9A-0000-1000-8000-00805F9B34FB
+    ------------------
+    4
+    c935292d241188a9e72effc262a72432
+    CF:F3:09:3A:AD:36
+    0000FE9A-0000-1000-8000-00805F9B34FB
+    ------------------
+    5
+    e092f10689af4497a7959c0a5f35ba3e
+    F1:F4:BE:EA:B3:59
+    0000FE9A-0000-1000-8000-00805F9B34FB
+    ------------------
+    */
+
+
     private String mBeaconAddress;
+
     BeaconScanner(MainActivity m, double intervalTime, String beaconAddress) {
         init(m, intervalTime, beaconAddress);
     }
@@ -51,7 +92,7 @@ public class BeaconScanner {
         scanFilters.add(filter);
         //filter와 settings 기능을 사용할때 아래 코드 사용
         ScanSettings.Builder scanSettings = new ScanSettings.Builder();
-        scanSettings.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
+        scanSettings.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
         //scanSettings.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
         mBluetoothLeScanner.startScan(scanFilters, scanSettings.build(), mRssiscanner);
         // filter와 settings 기능을 사용하지 않을 때는 아래 코드 사용
@@ -100,20 +141,18 @@ public class BeaconScanner {
             //타이머를 써서 0.5초 간격으로 rssi 평균값을 라즈베리파이로 보냄
             TimerTask timerTask = new TimerTask() {
                 @Override
-                public void run()
-                {
-//                    if (rssiBuffer.isEmpty()) return;
-//                    double rssiSum = 0;
-//                    Iterator<Double> iter = rssiBuffer.iterator();
-//
-//                    while (iter.hasNext()) {
-//                        rssiSum += iter.next();
-//                    }
-//                    rssiSum /= (double) rssiBuffer.size();
-//                    m.updateRssi(rssiSum, beaconAddress);
-                    m.updateRssi(mCurRssi, mBeaconAddress);
-//                    rssiBuffer.clear();
+                public void run() {
+                    if (rssiBuffer.isEmpty()) return;
+                    double rssiSum = 0;
+                    Iterator<Double> iter = rssiBuffer.iterator();
 
+                    while (iter.hasNext()) {
+                        rssiSum += iter.next();
+                    }
+                    rssiSum /= (double) rssiBuffer.size();
+                    m.updateRssi(rssiSum, mBeaconAddress);
+                    // m.updateRssi(mCurRssi, mBeaconAddress);
+                    rssiBuffer.clear();
                 }
             };
             mRssiSendTimer.schedule(timerTask, (int) (mIntervalTime * 1000), (int) (mIntervalTime * 1000));
@@ -137,13 +176,12 @@ public class BeaconScanner {
             if (rssi < 0 || prevRssi == INIT_VAL) {
                 //rssi가 튀는 것을 방지
                 //if (prevRssi - 5 < rssi && rssi < prevRssi + 5) {
-                    //칼만필터
-                    if (mKalmanOn) {
-                        mCurRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
-                    }
-                    else
-                        mCurRssi = rssi;
-                    //rssiBuffer.add(mCurRssi); //비콘 값을 평균내기위해 배열에 추가
+                //칼만필터
+                if (mKalmanOn) {
+                    mCurRssi = mKalmanFilter.update(rssi); //칼만 필터 사용해서 튀는 rssi값을 잡아줌
+                } else
+                    mCurRssi = rssi;
+                rssiBuffer.add(mCurRssi); //비콘 값을 평균내기위해 배열에 추가
                 //}
             }
             prevRssi = rssi;

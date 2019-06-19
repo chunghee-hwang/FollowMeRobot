@@ -93,6 +93,24 @@
                     android:layout_height="wrap_content"
                     android:textSize="20sp"
                     />
+                <TextView
+                    android:id="@+id/rssiText3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    />
+                <TextView
+                    android:id="@+id/rssiText4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    />
+                <TextView
+                    android:id="@+id/rssiText5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    />
 
             </LinearLayout>
 

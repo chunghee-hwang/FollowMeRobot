@@ -39,10 +39,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private final int REQUEST_GPS_ON = 300;
     public BluetoothAdapter mBluetoothAdapter;
     //통신 기록 텍스트뷰, 블루투스 장치 정보 텍스트뷰
-    public TextView mRssiText1, mRssiText2, mDirectionText, mTxPowerText, mCommandText;
+    public TextView mRssiText1, mRssiText2, mRssiText3, mRssiText4, mRssiText5, mDirectionText, mTxPowerText, mCommandText;
     public EditText mRssiThresholdEdit;
     private BluetoothComm mBluetoothComm;
-    private BeaconScanner mBeaconScanner, mBeaconScanner2;
+    private BeaconScanner mBeaconScanner, mBeaconScanner2, mBeaconScanner3, mBeaconScanner4, mBeaconScanner5;
     private Compass mCompass;
     private Commander mCommander;
 
@@ -66,6 +66,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mDirectionText = findViewById(R.id.directionText);
         mRssiText1 = findViewById(R.id.rssiText1);
         mRssiText2 = findViewById(R.id.rssiText2);
+        mRssiText3 = findViewById(R.id.rssiText3);
+        mRssiText4 = findViewById(R.id.rssiText4);
+        mRssiText5 = findViewById(R.id.rssiText5);
         mCommandText = findViewById(R.id.commandText);
         mCommander = new Commander(MainActivity.this);
 
@@ -75,6 +78,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mBeaconScanner.setKalmanOn(isChecked);
                 mBeaconScanner2.setKalmanOn(isChecked);
+                mBeaconScanner3.setKalmanOn(isChecked);
+                mBeaconScanner4.setKalmanOn(isChecked);
+                mBeaconScanner5.setKalmanOn(isChecked);
+
             }
         });
 
@@ -103,11 +110,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     startBeaconScanner();
-                    startBeaconScanner2();
                 }
                 else {
                     stopBeaconScanner();
-                    stopBeaconScanner2();
                 }
             }
         });
@@ -218,31 +223,51 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     void initBeaconScanner() {
         mBeaconScanner = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON1);
         mBeaconScanner2 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON2);
+        mBeaconScanner3 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON3);
+        mBeaconScanner4 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON4);
+        mBeaconScanner5 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON5);
     }
 
     void startBeaconScanner() {
         if (mBeaconScanner != null)
             mBeaconScanner.start();
-    }
-
-    void startBeaconScanner2()
-    {
         if (mBeaconScanner2 != null)
             mBeaconScanner2.start();
+        if (mBeaconScanner3 != null)
+            mBeaconScanner3.start();
+        if (mBeaconScanner4 != null)
+            mBeaconScanner4.start();
+        if (mBeaconScanner5 != null)
+            mBeaconScanner5.start();
     }
+
+//    void startBeaconScanner2()
+//    {
+//        if (mBeaconScanner2 != null)
+//            mBeaconScanner2.start();
+//    }
 
     void stopBeaconScanner() {
         if (mBeaconScanner != null)
             mBeaconScanner.stop();
+        if (mBeaconScanner2 != null)
+            mBeaconScanner2.stop();
+        if (mBeaconScanner3 != null)
+            mBeaconScanner3.stop();
+        if (mBeaconScanner4 != null)
+            mBeaconScanner4.stop();
+        if (mBeaconScanner5 != null)
+            mBeaconScanner5.stop();
+
     }
 
-    void stopBeaconScanner2() {
-        if (mBeaconScanner2 != null)
-           mBeaconScanner2.stop();
-    }
+//    void stopBeaconScanner2() {
+//        if (mBeaconScanner2 != null)
+//           mBeaconScanner2.stop();
+//    }
 
     public void updateRssi(final double rssi, final String beaconAddress) {
-        mCommander.updateRssi(rssi, beaconAddress);
+        //mCommander.updateRssi(rssi, beaconAddress);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -252,6 +277,15 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                         break;
                     case BeaconScanner.BEACON2:
                         mRssiText2.setText("RSSI2=" + String.format("%.2f", rssi) + "dBm");
+                        break;
+                    case BeaconScanner.BEACON3:
+                        mRssiText3.setText("RSSI3=" + String.format("%.2f", rssi) + "dBm");
+                        break;
+                    case BeaconScanner.BEACON4:
+                        mRssiText4.setText("RSSI4=" + String.format("%.2f", rssi) + "dBm");
+                        break;
+                    case BeaconScanner.BEACON5:
+                        mRssiText5.setText("RSSI5=" + String.format("%.2f", rssi) + "dBm");
                         break;
                 }
 
@@ -286,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     protected void onDestroy() {
         stopBeaconScanner();
-        stopBeaconScanner2();
+        //stopBeaconScanner2();
         stopBluetoothComm();
         stopCompass();
         super.onDestroy();

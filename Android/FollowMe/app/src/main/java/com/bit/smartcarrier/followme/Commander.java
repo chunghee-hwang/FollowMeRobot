@@ -30,7 +30,7 @@ public class Commander {
         m.mRssiThresholdEdit.setText(rssiThreshold + "");
         mRssis = new double[2];
         mRssis[0] = 0;
-        mRssis[1] = 1;
+        mRssis[1] = 0;
     }
 
     void updateRssi(double rssi, String beaconAddress)
