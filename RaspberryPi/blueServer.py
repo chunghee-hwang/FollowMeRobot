@@ -7,7 +7,7 @@ def acceptClient(server_socket):
     print("Accepted connection from ",address)
     return client_socket
 
-def start_server():
+def start_server(q):
     print('start server!!')
 
     #페어링 동작 재시작
@@ -41,6 +41,7 @@ def start_server():
 
             continue
         msg = data.decode('utf-8') #메시지를 byte[]에서 string으로 변환
-        print("Received: %s" % msg)
+        #print("Received: %s" % msg)
+        q.put(msg)
     server_socket.close() # 블루투스 서버 소켓 닫음
     os.system("sudo systemctl restart AutoPair.service")

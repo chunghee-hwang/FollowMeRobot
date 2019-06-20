@@ -12,7 +12,7 @@ GPIO.setwarnings(False)
 # 모터 상태
 STOP  = 0
 FORWARD  = 1
-BACKWORD = 2
+BACKWARD = 2
 
 # 모터 채널
 CH1 = 0
@@ -50,6 +50,35 @@ def setPinConfig(EN, INA, INB):
 pwmA = setPinConfig(ENA, IN1, IN2)
 pwmB = setPinConfig(ENB, IN3, IN4)
 
+
+def goforward(speed):
+    setMotor(CH1, speed, FORWARD)
+    setMotor(CH2, speed, FORWARD)
+
+def gobackward(speed):
+    setMotor(CH1, speed, BACKWARD)
+    setMotor(CH2, speed, BACKWARD)
+
+def stop():
+    setMotor(CH1, 45, STOP)
+    setMotor(CH2, 45, STOP)
+
+def leftturn():
+    setMotor(CH1, 45, BACKWARD)
+    setMotor(CH2, 45, FORWARD)
+
+def rightturn():
+    setMotor(CH1, 45, FORWARD)
+    setMotor(CH2, 45, BACKWARD)
+
+def leftturn2():
+    setMotor(CH1, 20, FORWARD)
+    setMotor(CH2, 45, FORWARD)
+
+def rightturn2():
+    setMotor(CH1, 45, FORWARD)
+    setMotor(CH2, 20, FORWARD)
+
 # 모터 제어 함수
 def setMotorContorl(pwm, INA, INB, speed, stat):
 
@@ -61,7 +90,7 @@ def setMotorContorl(pwm, INA, INB, speed, stat):
         GPIO.output(INB, LOW)
         
     #뒤로
-    elif stat == BACKWORD:
+    elif stat == BACKWARD:
         GPIO.output(INA, LOW)
         GPIO.output(INB, HIGH)
         
@@ -79,19 +108,3 @@ def setMotor(ch, speed, stat):
     else:
         #pwmB는 핀 설정 후 pwm 핸들을 리턴 받은 값이다.
         setMotorContorl(pwmB, IN3, IN4, speed, stat)
-
-def goforward(speed):
-    setMotor(CH1, speed, FORWARD)
-    setMotor(CH2, speed, FORWARD)
-    
-def gobackward(speed):
-    setMotor(CH1, speed, BACKWARD)
-    setMotor(CH2, speed, BACKWARD)
-
-def turnleft(speed):
-    setMotor(CH1, speed, STOP)
-    setMotor(CH2, speed, FORWARD)
-    
-def turnright(speed):
-    setMotor(CH1, speed, FORWARD)
-    setMotor(CH2, speed, STOP)

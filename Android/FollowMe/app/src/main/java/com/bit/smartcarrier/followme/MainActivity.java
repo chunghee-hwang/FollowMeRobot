@@ -222,21 +222,21 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     //비콘 스캐너 초기화 함수
     void initBeaconScanner() {
         mBeaconScanner = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON1);
-        mBeaconScanner2 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON2);
-        mBeaconScanner3 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON3);
-        mBeaconScanner4 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON4);
+//        mBeaconScanner2 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON2);
+//        mBeaconScanner3 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON3);
+//        mBeaconScanner4 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON4);
         mBeaconScanner5 = new BeaconScanner(MainActivity.this, 0.5, BeaconScanner.BEACON5);
     }
 
     void startBeaconScanner() {
         if (mBeaconScanner != null)
             mBeaconScanner.start();
-        if (mBeaconScanner2 != null)
-            mBeaconScanner2.start();
-        if (mBeaconScanner3 != null)
-            mBeaconScanner3.start();
-        if (mBeaconScanner4 != null)
-            mBeaconScanner4.start();
+//        if (mBeaconScanner2 != null)
+//            mBeaconScanner2.start();
+//        if (mBeaconScanner3 != null)
+//            mBeaconScanner3.start();
+//        if (mBeaconScanner4 != null)
+//            mBeaconScanner4.start();
         if (mBeaconScanner5 != null)
             mBeaconScanner5.start();
     }
@@ -250,12 +250,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     void stopBeaconScanner() {
         if (mBeaconScanner != null)
             mBeaconScanner.stop();
-        if (mBeaconScanner2 != null)
-            mBeaconScanner2.stop();
-        if (mBeaconScanner3 != null)
-            mBeaconScanner3.stop();
-        if (mBeaconScanner4 != null)
-            mBeaconScanner4.stop();
+//        if (mBeaconScanner2 != null)
+//            mBeaconScanner2.stop();
+//        if (mBeaconScanner3 != null)
+//            mBeaconScanner3.stop();
+//        if (mBeaconScanner4 != null)
+//            mBeaconScanner4.stop();
         if (mBeaconScanner5 != null)
             mBeaconScanner5.stop();
 
@@ -267,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 //    }
 
     public void updateRssi(final double rssi, final String beaconAddress) {
-        //mCommander.updateRssi(rssi, beaconAddress);
+        mCommander.updateRssi(rssi, beaconAddress);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -275,15 +275,15 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     case BeaconScanner.BEACON1:
                         mRssiText1.setText("RSSI1=" + String.format("%.2f", rssi) + "dBm");
                         break;
-                    case BeaconScanner.BEACON2:
-                        mRssiText2.setText("RSSI2=" + String.format("%.2f", rssi) + "dBm");
-                        break;
-                    case BeaconScanner.BEACON3:
-                        mRssiText3.setText("RSSI3=" + String.format("%.2f", rssi) + "dBm");
-                        break;
-                    case BeaconScanner.BEACON4:
-                        mRssiText4.setText("RSSI4=" + String.format("%.2f", rssi) + "dBm");
-                        break;
+//                    case BeaconScanner.BEACON2:
+//                        mRssiText2.setText("RSSI2=" + String.format("%.2f", rssi) + "dBm");
+//                        break;
+//                    case BeaconScanner.BEACON3:
+//                        mRssiText3.setText("RSSI3=" + String.format("%.2f", rssi) + "dBm");
+//                        break;
+//                    case BeaconScanner.BEACON4:
+//                        mRssiText4.setText("RSSI4=" + String.format("%.2f", rssi) + "dBm");
+//                        break;
                     case BeaconScanner.BEACON5:
                         mRssiText5.setText("RSSI5=" + String.format("%.2f", rssi) + "dBm");
                         break;

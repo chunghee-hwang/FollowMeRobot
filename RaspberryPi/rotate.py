@@ -25,37 +25,27 @@ def mainfunc(q):
 #                    stopcnt = stopcnt + 1
 #                    if stopcnt > 0:
                         stop()                    
-                        print('stop complete')
+#                        print('stop complete')
 #                        gocnt = 0
-                elif command.startswith('GO'):
+#                elif command.startswith('GO'):
 #                    gocnt = gocnt + 1
 #                    if gocnt > 1:
-                        goforward(speed)
-                        print('go complete')
+#                        goforward(speed)
+#                        print('go complete')
 #                        stopcnt = 0
-#                elif command.startswith('LEFT'):
-#                    leftturn()
-#                    print('leftturn')
-#                elif command.startswith('RIGHT'):
-#                    rightturn()
-#                    print('rightturn')
-                elif command.startswith('SETSPEED'):
-                   speed = (float)(command.split()[1])
-                   goforward(speed)
-                   print('set speed complete')
-#                elif command.startswith('SETDIRECTION'):
-#                    direction = (int)(command.split()[1])
-#                    print('set direction', direction, 'complete')
-            #cls()
-            #print ("CENTER = %.1f cm" % center.value)
-            #if center.value >= 50 and far_close.value == 0:
-            #if far_close.value == 0:
-            #    setMotor(CH1, 45, FORWARD)
-            #    setMotor(CH2, 40, FORWARD)
-            #elif center.value < 50 and far_close.value == 1:
-            #else:
-            #    setMotor(CH1, 45, STOP)
-            #    setMotor(CH2, 45, STOP) 
+                elif command.startswith('LEFT'):
+                    leftturn()
+                    print('leftturn')
+                elif command.startswith('RIGHT'):
+                    rightturn()
+                    print('rightturn')
+#                elif command.startswith('SETSPEED'):
+#                   speed = (float)(command.split()[1])
+                   #goforward(speed)
+#                   print('set speed complete')
+                elif command.startswith('SETDIRECTION'):
+                    direction = (int)(command.split()[1])
+                    print('set direction', direction, 'complete')
             sleep(0.01)
         # Reset by pressing CTRL + C
     except KeyboardInterrupt:
