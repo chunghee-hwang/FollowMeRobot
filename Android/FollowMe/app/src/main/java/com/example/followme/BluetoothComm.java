@@ -1,5 +1,6 @@
-package com.bit.smartcarrier.followme;
-
+package com.example.followme;
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
@@ -8,36 +9,86 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.estimote.mustard.rx_goodness.rx_requirements_wizard.Requirement;
+import com.estimote.mustard.rx_goodness.rx_requirements_wizard.RequirementsWizardFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Set;
 
-//블루투스 통신을 백그라운드로 작업
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
+
 public class BluetoothComm {
     ConnectedTask mConnectedTask = null; //라즈베리파이와 연결되었을 때 하는 작업
-    private String mConnectedDeviceName = null; //연결된 장치 이름 
+    private String mConnectedDeviceName = null; //연결된 장치 이름
     static boolean isConnectionError = false;
     private static final String TAG = "BluetoothClient";
-    private MainActivity mainActivity;
-
-    BluetoothComm(MainActivity m) {
-        init(m);
+    private Activity mAc;
+    private BluetoothAdapter mBluetoothAdapter;
+    public static boolean isConnected;
+    private static BluetoothComm mBluetoothComm;
+    private BluetoothComm(Activity ac) {
     }
+    public static BluetoothComm getInstance(Activity ac)
+    {
+        if(mBluetoothComm==null)
+            mBluetoothComm = new BluetoothComm(ac);
+        return mBluetoothComm;
+    }
+    void init(final Activity ac) {
+        this.mAc = ac;
+        RequirementsWizardFactory
+                .createEstimoteRequirementsWizard()
+                .fulfillRequirements(ac,
+                        // onRequirementsFulfilled
+                        new Function0<Unit>() {
+                            @Override
+                            public Unit invoke() {
+                                try {
+                                    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                                    if(!isConnected)
+                                        showPairedDevicesDialog(); //MainActivity에 현재 페어링된 장치 목록 전달
+                                    //Toast.makeText(ac, "requirements fulfilled", Toast.LENGTH_SHORT).show();
+                                } catch (final Exception e) {
+                                    Toast.makeText(ac, "에러 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
 
-    private void init(MainActivity m) {
-        this.mainActivity = m;
-        showPairedDevicesDialog(); //MainActivity에 현재 페어링된 장치 목록 전달
+                                }
+                                return null;
+                            }
+                        },
+                        // onRequirementsMissing
+                        new Function1<List<? extends Requirement>, Unit>() {
+                            @Override
+                            public Unit invoke(List<? extends Requirement> requirements) {
+                                Toast.makeText(ac, "요구사항이 부족합니다: " + requirements, Toast.LENGTH_SHORT).show();
+                                ac.finish();
+                                return null;
+                            }
+                        },
+                        // onError
+                        new Function1<Throwable, Unit>() {
+                            @Override
+                            public Unit invoke(Throwable throwable) {
+                                Toast.makeText(ac, "요구사항 에러: " + throwable, Toast.LENGTH_SHORT).show();
+                                ac.finish();
+                                return null;
+                            }
+                        });
     }
 
     void stop() {
         if (mConnectedTask != null) {
             mConnectedTask.cancel(true);
         }
+        isConnected = false;
     }
 
-    //라즈베리파이와 통신하기위한 클래스 
+    //라즈베리파이와 통신하기위한 클래스
     private class ConnectTask extends AsyncTask<Void, Void, Boolean> {
         private BluetoothSocket mBluetoothSocket = null;//블루투스 소켓
         private BluetoothDevice mBluetoothDevice = null;//연결된 블루투스 장치
@@ -57,13 +108,13 @@ public class BluetoothComm {
             } catch (Exception e) {
                 Log.e(TAG, "socket create failed " + e.getMessage());
             }
-            Toast.makeText(mainActivity.getApplicationContext(), "connecting...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mAc, "connecting...", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             // 블루투스 스캔을 멈춤
-            mainActivity.mBluetoothAdapter.cancelDiscovery();
+            mBluetoothAdapter.cancelDiscovery();
 
             // 라즈베리파이에 연결을 시도함.
             try {
@@ -89,7 +140,8 @@ public class BluetoothComm {
             } else {
 
                 isConnectionError = true;
-                Toast.makeText(mainActivity.getApplicationContext(), "Unable to connect device", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mAc, "장치에 연결하지 못했습니다.", Toast.LENGTH_SHORT).show();
+                mAc.finish();
             }
         }
     }
@@ -97,7 +149,9 @@ public class BluetoothComm {
     //라즈베리파이와 성공적으로 연결됐다면 ConnectedTask 실행
     private void connected(BluetoothSocket socket) {
         mConnectedTask = new ConnectedTask(socket);
-        Toast.makeText(mainActivity.getApplicationContext(), "connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+        Toast.makeText(mAc, mConnectedDeviceName+"에 연결되었습니다.", Toast.LENGTH_SHORT).show();
+        ((SwitchActivity)mAc).mFollowToggle.setEnabled(true);
+        isConnected = true;
     }
 
     //라즈베리파이와 String 값을 주고받는 작업을 하는 클래스
@@ -171,7 +225,8 @@ public class BluetoothComm {
             if (!isSucess) {
                 closeSocket();
                 isConnectionError = true;
-                Toast.makeText(mainActivity.getApplicationContext(), "Device connection was lost", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mAc, "장치 연결이 끊어졌습니다.", Toast.LENGTH_SHORT).show();
+                mAc.finish();
             }
         }
 
@@ -208,14 +263,14 @@ public class BluetoothComm {
 
             } catch (IOException e) {
                 Log.e(TAG, "Exception during send", e);
-                mainActivity.runOnUiThread(new Runnable() {
+                mAc.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(mainActivity, "error : Server is down!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mAc, "error : Server is down!", Toast.LENGTH_SHORT).show();
                     }
                 });
 
-                mainActivity.finish();
+                mAc.finish();
             }
 
         }
@@ -224,7 +279,11 @@ public class BluetoothComm {
     //MainActivity에게 현재 페어링된 장치 목록을 전달
     public void showPairedDevicesDialog() {
         //현재 페어링된 장치 목록 가져옴.
-        Set<BluetoothDevice> devices = mainActivity.mBluetoothAdapter.getBondedDevices();
+        if (mBluetoothAdapter == null) {
+            Toast.makeText(mAc, "bluetooth adapter is null!", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
         String[] items;
 
         //Set --> 배열로 변환
@@ -232,17 +291,25 @@ public class BluetoothComm {
 
         //만약 페어링된 장치가 없다면
         if (pairedDevices.length == 0) {
-            Toast.makeText(mainActivity.getApplicationContext(), "No devices have been paired.\n"
-                    + "You must pair it with another device.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mAc, "페어링된 장치가 없습니다. 페어링 먼저 진행해주세요!", Toast.LENGTH_SHORT).show();
             return;
         }
         items = new String[pairedDevices.length];
-        for (int i = 0; i < pairedDevices.length; i++) {
+        for (int i = 0; i < pairedDevices.length; i++)
+        {
             items[i] = pairedDevices[i].getName();
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
-        builder.setTitle("페어링된 장치중에 스마트캐리어가 무엇인가요?");
-        //builder.setCancelable(false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mAc);
+        builder.setTitle("페어링된 장치중에 FollowMe 로봇이 무엇인가요?");
+        builder.setCancelable(false);
+        builder.setNegativeButton("연결 취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(mAc, "연결을 취소합니다.", Toast.LENGTH_SHORT).show();
+                isConnected = false;
+                mAc.finish();
+            }
+        });
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -256,24 +323,19 @@ public class BluetoothComm {
 
     //라즈베리파이에게 메시지를 전달하는 함수
     void sendMessage(final String msg) {
-        if (mConnectedTask != null)
-        {
+        if (mConnectedTask != null) {
             mConnectedTask.write(msg);
             Log.d(TAG, "send message: " + msg);
         }
-        mainActivity.runOnUiThread(new Runnable() {
+        mAc.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mainActivity.mCommandText != null)
-                    mainActivity.mCommandText.append("Android:" + msg + "\n");
+                Toast.makeText(mAc, "Android: " + msg, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void recvMessage(String msg)
-    {
-        if (mConnectedDeviceName == null)
-            mConnectedDeviceName = "N/A";
-        mainActivity.mCommandText.append(mConnectedDeviceName + ": " + msg + "\n");
+    private void recvMessage(String msg) {
+
     }
 }

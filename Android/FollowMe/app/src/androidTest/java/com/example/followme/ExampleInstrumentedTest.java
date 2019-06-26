@@ -1,4 +1,4 @@
-package com.bit.smartcarrier.followme;
+package com.example.followme;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.bit.smartcarrier.followme", appContext.getPackageName());
+        assertEquals("com.example.followme", appContext.getPackageName());
     }
 }

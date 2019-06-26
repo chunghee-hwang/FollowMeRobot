@@ -1,200 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_gravity="center_horizontal"
-    android:padding="10dp"
-    >
-    <RadioGroup
-        android:id="@+id/radioGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center_horizontal"
-        >
-        <RadioButton
-            android:id="@+id/autoRadio"
-            android:text="자동 모드"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <RadioButton
-            android:id="@+id/manualRadio"
-            android:text="수동 모드"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </RadioGroup>
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/autoLinear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
-        <TextView
-            android:id="@+id/bleAddrText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <ToggleButton
-            android:id="@+id/kalmanToggle"
-            android:textOn="칼만필터 on"
-            android:textOff="칼만필터 off"
-            android:checked="false"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-            <EditText
-                android:id="@+id/rssiThresholdEdit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="rssi_threshold"
-                android:inputType="numberDecimal|numberSigned"
-                />
-            <Button
-                android:id="@+id/rssiThresholdButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="설정"
-                />
-
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-            <ToggleButton
-                android:id="@+id/basicScanToggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textOn="스캐너 on"
-                android:textOff="스캐너 off"
-                />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
-                <TextView
-                    android:id="@+id/rssiText1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    />
-                <TextView
-                    android:id="@+id/rssiText2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    />
-                <TextView
-                    android:id="@+id/rssiText3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    />
-                <TextView
-                    android:id="@+id/rssiText4"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    />
-                <TextView
-                    android:id="@+id/rssiText5"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    />
-
-            </LinearLayout>
-
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-            <ToggleButton
-                android:id="@+id/compassToggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textOn="나침반 on"
-                android:textOff="나침반 off"
-                />
-            <TextView
-                android:id="@+id/directionText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                />
-
-        </LinearLayout>
-
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/manualLinear"
-        android:visibility="gone"
-        android:orientation="vertical"
+    <ImageButton
+        android:id="@+id/button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        >
-        <Button
-            android:id="@+id/upButton"
-            android:layout_gravity="center_horizontal"
-            android:text="▲"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center_horizontal"
-            >
-            <Button
-                android:id="@+id/leftButton"
-                android:text="◀"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/rightButton"
-                android:text="▶"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#E6E6E6"
+        android:onClick="button1OnClick"
+        android:src="@drawable/cam_black"
+        android:text="Button" />
 
-        <Button
-            android:id="@+id/downButton"
-            android:layout_gravity="center_horizontal"
-            android:text="▼"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <TextView
-        android:layout_marginTop="20dp"
-        android:text="블루투스 통신 콘솔"
-        android:layout_gravity="center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <View
-        android:layout_marginTop="10dp"
+    <ImageButton
+        android:id="@+id/button2"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#000000"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:id="@+id/commandText"
-        android:gravity="bottom"
-        />
-
-
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#919191"
+        android:onClick="button2OnClick"
+        android:src="@drawable/album_white"
+        android:text="Button" />
 </LinearLayout>

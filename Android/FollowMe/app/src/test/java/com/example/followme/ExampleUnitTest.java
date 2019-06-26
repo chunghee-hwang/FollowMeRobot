@@ -1,4 +1,4 @@
-package com.bit.smartcarrier.followme;
+package com.example.followme;
 
 import org.junit.Test;
 
