@@ -44,9 +44,6 @@ public class ColorpickerActivity extends AppCompatActivity {
         // 기본 해상도 지정(정상적으로 나오는 기기의 해상도)
         int baseScreenResolutionX;
         int baseScreenResolutionY;
-
-
-
         try {
             final Bitmap bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
 

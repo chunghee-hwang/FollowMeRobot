@@ -16,12 +16,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    //앨범 버튼이 눌렸을 때
+    //카메라 버튼이 눌렸을 때
     public void button1OnClick(View v) {
         Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
         startActivity(intent);
     }
 
+    //
     public void button2OnClick(View v) {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
@@ -34,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
             Uri selectedImageUri = data.getData();
-            // imageview.setImageURI(selectedImageUri);
             Intent intent = new Intent(getApplicationContext(), ColorpickerActivity.class);
             intent.putExtra("uri", selectedImageUri);
             startActivity(intent);
