@@ -32,12 +32,12 @@ public class BluetoothComm {
     private BluetoothAdapter mBluetoothAdapter;
     public static boolean isConnected;
     private static BluetoothComm mBluetoothComm;
-    private BluetoothComm(Activity ac) {
+    private BluetoothComm() {
     }
-    public static BluetoothComm getInstance(Activity ac)
+    public static BluetoothComm getInstance()
     {
         if(mBluetoothComm==null)
-            mBluetoothComm = new BluetoothComm(ac);
+            mBluetoothComm = new BluetoothComm();
         return mBluetoothComm;
     }
     void init(final Activity ac) {
@@ -123,6 +123,7 @@ public class BluetoothComm {
                 // 에러가 나면 소켓 닫음.
                 try {
                     mBluetoothSocket.close();
+
                 } catch (IOException e2) {
                     Log.e(TAG, "unable to close() " +
                             " socket during connection failure", e2);
@@ -142,6 +143,7 @@ public class BluetoothComm {
                 isConnectionError = true;
                 Toast.makeText(mAc, "장치에 연결하지 못했습니다.", Toast.LENGTH_SHORT).show();
                 mAc.finish();
+                isConnected = false;
             }
         }
     }
@@ -171,6 +173,7 @@ public class BluetoothComm {
                         ConnectedTask.this.execute();
                     } catch (IOException e) {
                         Log.e(TAG, "socket not created", e);
+                        isConnected = false;
                     }
                 }
             }.start();
@@ -227,6 +230,7 @@ public class BluetoothComm {
                 isConnectionError = true;
                 Toast.makeText(mAc, "장치 연결이 끊어졌습니다.", Toast.LENGTH_SHORT).show();
                 mAc.finish();
+                isConnected = false;
             }
         }
 
@@ -242,6 +246,7 @@ public class BluetoothComm {
             try {
 
                 mBluetoothSocket.close();
+
                 Log.d(TAG, "close socket()");
 
             } catch (IOException e2) {
@@ -263,6 +268,7 @@ public class BluetoothComm {
 
             } catch (IOException e) {
                 Log.e(TAG, "Exception during send", e);
+                isConnected = false;
                 mAc.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

@@ -51,47 +51,25 @@ pwmA = setPinConfig(ENA, IN1, IN2)
 pwmB = setPinConfig(ENB, IN3, IN4)
 
 
-def forward_1():
-    setMotor(CH1, 45, FORWARD)
-    setMotor(CH2, 45, FORWARD)
-    time.sleep(0.01)
-    print("slow forward")
+def goforward(speed):
+    setMotor(CH1, speed, FORWARD)
+    setMotor(CH2, speed, FORWARD)
 
-def forward_2():
-    setMotor(CH1, 60, FORWARD)
-    setMotor(CH2, 60, FORWARD)
-    time.sleep(0.01)
-    print("fast forward")
+def gobackward(speed):
+    setMotor(CH1, speed, BACKWARD)
+    setMotor(CH2, speed, BACKWARD)
 
-def Reverse():
-    setMotor(CH1, 45, BACKWARD)
-    setMotor(CH2, 45, BACKWARD)
-    time.sleep(0.01)
-    print("backward")
-    
-def brake():
-    setMotor(CH1, 10, BACKWARD)
-    setMotor(CH2, 10, BACKWARD)
-    time.sleep(0.01)
-    print("brake")
-    
 def stop():
     setMotor(CH1, 45, STOP)
     setMotor(CH2, 45, STOP)
-    print("stop")
 
-def turnLeft():
+def leftturn():
     setMotor(CH1, 45, BACKWARD)
     setMotor(CH2, 45, FORWARD)
-    time.sleep(0.01)
-    print("left")
 
-def turnRight():
+def rightturn():
     setMotor(CH1, 45, FORWARD)
     setMotor(CH2, 45, BACKWARD)
-    time.sleep(0.01)
-    print("right")
-
 
 def leftturn2():
     setMotor(CH1, 20, FORWARD)

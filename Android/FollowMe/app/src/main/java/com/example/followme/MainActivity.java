@@ -16,8 +16,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
+    //앨범 버튼이 눌렸을 때
     public void button1OnClick(View v) {
-//        Toast.makeText(getApplicationContext(), "button2OnClick", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
         startActivity(intent);
     }
@@ -26,8 +26,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
         startActivityForResult(intent, GET_GALLERY_IMAGE);
-//        Intent intent = new Intent(getApplicationContext(), SwitchActivity.class);
-//        startActivity(intent);
     }
 
     @Override
@@ -44,4 +42,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        BluetoothComm.getInstance().stop();
+
+        super.onDestroy();
+    }
 }

@@ -14,7 +14,7 @@ public class SwitchActivity extends AppCompatActivity {
     private final int GET_GALLERY_IMAGE = 200;
     private final String TAG = "smartcarrier";
     private BeaconScanner mBeaconScanner;
-    private BluetoothComm mBluetoothComm;
+    private static BluetoothComm mBluetoothComm;
     private String mColorRGB="000000000";
     final static String GO = "GO";
     final static String STOP = "STOP";
@@ -110,11 +110,11 @@ public class SwitchActivity extends AppCompatActivity {
     // -----------------------------------------------------------------------------------------
     //블루투스 통신 작업 준비 및 시작
     private void initBluetoothComm() {
-        mBluetoothComm = BluetoothComm.getInstance(SwitchActivity.this);
+        mBluetoothComm = BluetoothComm.getInstance();
         mBluetoothComm.init(SwitchActivity.this);
     }
 
-    private void stopBluetoothComm() {
+    public static void stopBluetoothComm() {
         if (mBluetoothComm != null) mBluetoothComm.stop();
     }
 
