@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -20,6 +21,7 @@ public class SwitchActivity extends AppCompatActivity {
     final static String STOP = "STOP";
     ToggleButton mFollowToggle;
     ToggleButton mVibrationToggle;
+    ImageView mBluetoothToggle;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,16 +30,16 @@ public class SwitchActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         mColorRGB = intent.getStringExtra("colorRGB");
-
-
         mVibrationToggle = findViewById(R.id.vibration);
         mFollowToggle = findViewById(R.id.follow);
+        mBluetoothToggle = findViewById(R.id.bluetooth);
         ToggleHandler toggleHandler = new ToggleHandler();
         mVibrationToggle.setOnCheckedChangeListener(toggleHandler);
         mFollowToggle.setOnCheckedChangeListener(toggleHandler);
         mBeaconScanner = new BeaconScanner(this);
 
         initBluetoothComm();
+
     }
 
     private class ToggleHandler implements ToggleButton.OnCheckedChangeListener{
@@ -114,6 +116,25 @@ public class SwitchActivity extends AppCompatActivity {
         mBluetoothComm.init(SwitchActivity.this);
     }
 
+    void iconOff(){
+        if(mBluetoothToggle != null)
+        {
+            mBluetoothToggle.setBackgroundDrawable(getResources().
+                    getDrawable(R.drawable.off));
+            mFollowToggle.setEnabled(false);
+        }
+    }
+
+    void iconOn()
+    {
+        if(mBluetoothToggle != null)
+        {
+            mBluetoothToggle.setBackgroundDrawable(getResources().
+                    getDrawable(R.drawable.on));
+            mFollowToggle.setEnabled(true);
+        }
+    }
+
     public static void stopBluetoothComm() {
         if (mBluetoothComm != null) mBluetoothComm.stop();
     }
@@ -121,6 +142,8 @@ public class SwitchActivity extends AppCompatActivity {
     // -----------------------------------------------------------------------------------------
     // 블루투스 통신 코드 끝
     // -----------------------------------------------------------------------------------------
+
+
 
 
     //앱이 종료될때 호출되는 함수

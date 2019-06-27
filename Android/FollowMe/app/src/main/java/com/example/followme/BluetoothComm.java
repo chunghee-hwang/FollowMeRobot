@@ -52,11 +52,17 @@ public class BluetoothComm {
                                 try {
                                     mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                                     if(!isConnected)
-                                        showPairedDevicesDialog(); //MainActivity에 현재 페어링된 장치 목록 전달
+                                    {
+                                        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice("8C:88:2B:00:09:A0");
+                                        ConnectTask task = new ConnectTask(device);
+                                        task.execute();
+                                    }
+                                    else{
+                                        ((SwitchActivity)ac).iconOn();
+                                    }
                                     //Toast.makeText(ac, "requirements fulfilled", Toast.LENGTH_SHORT).show();
                                 } catch (final Exception e) {
                                     Toast.makeText(ac, "에러 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-
                                 }
                                 return null;
                             }
@@ -85,7 +91,10 @@ public class BluetoothComm {
         if (mConnectedTask != null) {
             mConnectedTask.cancel(true);
         }
+
         isConnected = false;
+        ((SwitchActivity)mAc).iconOff();
+        Toast.makeText(mAc, "연결을 해제합니다.", Toast.LENGTH_SHORT).show();
     }
 
     //라즈베리파이와 통신하기위한 클래스
@@ -95,8 +104,8 @@ public class BluetoothComm {
         private final int bluetooth_port = 1; //라즈베리파이의 파이썬 코드의 port번호와 동일해야함.
 
         ConnectTask(BluetoothDevice bluetoothDevice) {
-
             mBluetoothDevice = bluetoothDevice;
+
             mConnectedDeviceName = bluetoothDevice.getName();
             //SPP
             //UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
@@ -135,14 +144,13 @@ public class BluetoothComm {
 
         @Override
         protected void onPostExecute(Boolean isSucess) {
-
             if (isSucess) {
                 connected(mBluetoothSocket);
             } else {
 
                 isConnectionError = true;
                 Toast.makeText(mAc, "장치에 연결하지 못했습니다.", Toast.LENGTH_SHORT).show();
-                mAc.finish();
+                showPairedDevicesDialog();
                 isConnected = false;
             }
         }
@@ -152,8 +160,10 @@ public class BluetoothComm {
     private void connected(BluetoothSocket socket) {
         mConnectedTask = new ConnectedTask(socket);
         Toast.makeText(mAc, mConnectedDeviceName+"에 연결되었습니다.", Toast.LENGTH_SHORT).show();
-        ((SwitchActivity)mAc).mFollowToggle.setEnabled(true);
+
+        ((SwitchActivity)mAc).iconOn();
         isConnected = true;
+
     }
 
     //라즈베리파이와 String 값을 주고받는 작업을 하는 클래스
@@ -174,6 +184,7 @@ public class BluetoothComm {
                     } catch (IOException e) {
                         Log.e(TAG, "socket not created", e);
                         isConnected = false;
+                        ((SwitchActivity)mAc).iconOff();
                     }
                 }
             }.start();
@@ -230,6 +241,7 @@ public class BluetoothComm {
                 isConnectionError = true;
                 Toast.makeText(mAc, "장치 연결이 끊어졌습니다.", Toast.LENGTH_SHORT).show();
                 mAc.finish();
+                ((SwitchActivity)mAc).iconOff();
                 isConnected = false;
             }
         }
@@ -272,7 +284,7 @@ public class BluetoothComm {
                 mAc.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(mAc, "error : Server is down!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mAc, "에러 : 서버가 다운되었습니다!", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -298,6 +310,7 @@ public class BluetoothComm {
         //만약 페어링된 장치가 없다면
         if (pairedDevices.length == 0) {
             Toast.makeText(mAc, "페어링된 장치가 없습니다. 페어링 먼저 진행해주세요!", Toast.LENGTH_SHORT).show();
+            mAc.finish();
             return;
         }
         items = new String[pairedDevices.length];
@@ -312,8 +325,10 @@ public class BluetoothComm {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Toast.makeText(mAc, "연결을 취소합니다.", Toast.LENGTH_SHORT).show();
+                ((SwitchActivity)mAc).iconOff();
                 isConnected = false;
                 mAc.finish();
+
             }
         });
         builder.setItems(items, new DialogInterface.OnClickListener() {
