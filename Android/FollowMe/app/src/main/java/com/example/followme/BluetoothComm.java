@@ -1,4 +1,5 @@
 package com.example.followme;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -32,14 +33,16 @@ public class BluetoothComm {
     private BluetoothAdapter mBluetoothAdapter;
     public static boolean isConnected;
     private static BluetoothComm mBluetoothComm;
+
     private BluetoothComm() {
     }
-    public static BluetoothComm getInstance()
-    {
-        if(mBluetoothComm==null)
+
+    public static BluetoothComm getInstance() {
+        if (mBluetoothComm == null)
             mBluetoothComm = new BluetoothComm();
         return mBluetoothComm;
     }
+
     void init(final Activity ac) {
         this.mAc = ac;
         RequirementsWizardFactory
@@ -51,14 +54,12 @@ public class BluetoothComm {
                             public Unit invoke() {
                                 try {
                                     mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                                    if(!isConnected)
-                                    {
+                                    if (!isConnected) {
                                         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice("8C:88:2B:00:09:A0");
                                         ConnectTask task = new ConnectTask(device);
                                         task.execute();
-                                    }
-                                    else{
-                                        ((SwitchActivity)ac).iconOn();
+                                    } else {
+                                        ((SwitchActivity) ac).iconOn();
                                     }
                                     //Toast.makeText(ac, "requirements fulfilled", Toast.LENGTH_SHORT).show();
                                 } catch (final Exception e) {
@@ -93,8 +94,10 @@ public class BluetoothComm {
         }
 
         isConnected = false;
-        ((SwitchActivity)mAc).iconOff();
-        Toast.makeText(mAc, "연결을 해제합니다.", Toast.LENGTH_SHORT).show();
+        if (mAc != null) {
+            ((SwitchActivity) mAc).iconOff();
+            Toast.makeText(mAc, "연결을 해제합니다.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     //라즈베리파이와 통신하기위한 클래스
@@ -159,9 +162,11 @@ public class BluetoothComm {
     //라즈베리파이와 성공적으로 연결됐다면 ConnectedTask 실행
     private void connected(BluetoothSocket socket) {
         mConnectedTask = new ConnectedTask(socket);
-        Toast.makeText(mAc, mConnectedDeviceName+"에 연결되었습니다.", Toast.LENGTH_SHORT).show();
+        if(mAc != null) {
+            Toast.makeText(mAc, mConnectedDeviceName + "에 연결되었습니다.", Toast.LENGTH_SHORT).show();
 
-        ((SwitchActivity)mAc).iconOn();
+            ((SwitchActivity) mAc).iconOn();
+        }
         isConnected = true;
 
     }
@@ -184,7 +189,9 @@ public class BluetoothComm {
                     } catch (IOException e) {
                         Log.e(TAG, "socket not created", e);
                         isConnected = false;
-                        ((SwitchActivity)mAc).iconOff();
+                        if (mAc != null) {
+                            ((SwitchActivity) mAc).iconOff();
+                        }
                     }
                 }
             }.start();
@@ -240,8 +247,10 @@ public class BluetoothComm {
                 closeSocket();
                 isConnectionError = true;
                 Toast.makeText(mAc, "장치 연결이 끊어졌습니다.", Toast.LENGTH_SHORT).show();
-                mAc.finish();
-                ((SwitchActivity)mAc).iconOff();
+                if (mAc != null) {
+                    mAc.finish();
+                    ((SwitchActivity) mAc).iconOff();
+                }
                 isConnected = false;
             }
         }
@@ -281,12 +290,16 @@ public class BluetoothComm {
             } catch (IOException e) {
                 Log.e(TAG, "Exception during send", e);
                 isConnected = false;
-                mAc.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(mAc, "에러 : 서버가 다운되었습니다!", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                if (mAc != null) {
+                    mAc.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(mAc, "에러 : 서버가 다운되었습니다!", Toast.LENGTH_SHORT).show();
+                            ((SwitchActivity) mAc).iconOff();
+                        }
+                    });
+                }
+
 
                 mAc.finish();
             }
@@ -314,8 +327,7 @@ public class BluetoothComm {
             return;
         }
         items = new String[pairedDevices.length];
-        for (int i = 0; i < pairedDevices.length; i++)
-        {
+        for (int i = 0; i < pairedDevices.length; i++) {
             items[i] = pairedDevices[i].getName();
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(mAc);
@@ -324,10 +336,13 @@ public class BluetoothComm {
         builder.setNegativeButton("연결 취소", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(mAc, "연결을 취소합니다.", Toast.LENGTH_SHORT).show();
-                ((SwitchActivity)mAc).iconOff();
+                if(mAc!=null) {
+                    Toast.makeText(mAc, "연결을 취소합니다.", Toast.LENGTH_SHORT).show();
+                    ((SwitchActivity) mAc).iconOff();
+
+                    mAc.finish();
+                }
                 isConnected = false;
-                mAc.finish();
 
             }
         });

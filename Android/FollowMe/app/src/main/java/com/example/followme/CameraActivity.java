@@ -12,13 +12,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
-
 import java.io.IOException;
 
 
@@ -30,10 +27,11 @@ public class CameraActivity extends AppCompatActivity
     private final int GET_GALLERY_IMAGE = 200;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    public static int CAMERA_FACING = Camera.CameraInfo.CAMERA_FACING_FRONT; //셀카인지 뒷면인지
+    public static int flag=0;
     private SurfaceView surfaceView;
     private CameraPreview mCameraPreview;
     private View mLayout;  // Snackbar 사용하기 위해서는 View가 필요합니다.
+    private static int conversionflag=0;
     View decorView;
     int uiOption;
     // (참고로 Toast에서는 Context가 필요했습니다.)
@@ -133,7 +131,34 @@ public class CameraActivity extends AppCompatActivity
     }
 
     public void conversion(View v) {
-        conversion();
+
+        if(mCameraPreview.mCamera!=null) {
+            mCameraPreview.mCamera.stopPreview();
+            mCameraPreview.mCamera.release();
+            mCameraPreview.mCamera = null;
+
+        }
+        if(conversionflag%2==0)
+        {
+            mCameraPreview.mCamera = mCameraPreview.mCamera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+            conversionflag++;
+        }
+        else
+        {
+            mCameraPreview.mCamera = mCameraPreview.mCamera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
+            conversionflag++;
+        }
+
+        try {
+            mCameraPreview.mCamera.setPreviewDisplay(mCameraPreview.mHolder);
+        } catch (IOException e) {
+            mCameraPreview.mCamera.release();
+            mCameraPreview.mCamera=null;
+        }
+        mCameraPreview.surfaceCreated(mCameraPreview.mHolder);
+        mCameraPreview.mCamera.startPreview();
+        flag++;
+
     }
     private void deleteStatusBar() {
         decorView = getWindow().getDecorView();
@@ -150,27 +175,7 @@ public class CameraActivity extends AppCompatActivity
     void startCamera() {
 
         // Create the Preview view and set it as the content of this Activity.
-        mCameraPreview = new CameraPreview(this, this, CAMERA_FACING, surfaceView);
-    }
-
-    public void conversion() {
-        if(mCameraPreview.mCamera!=null) {
-            mCameraPreview.mCamera.stopPreview();
-            mCameraPreview.mCamera.release();
-            mCameraPreview.mCamera = null;
-        }
-
-        CAMERA_FACING = (CAMERA_FACING == Camera.CameraInfo.CAMERA_FACING_FRONT) ?
-                Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
-        mCameraPreview.mCamera = mCameraPreview.mCamera.open(CAMERA_FACING);
-        try {
-            mCameraPreview.mCamera.setPreviewDisplay(mCameraPreview.mHolder);
-        } catch (IOException e) {
-            mCameraPreview.mCamera.release();
-            mCameraPreview.mCamera=null;
-        }
-        mCameraPreview.surfaceCreated(mCameraPreview.mHolder);
-        mCameraPreview.mCamera.startPreview();
+        mCameraPreview = new CameraPreview(this, this, Camera.CameraInfo.CAMERA_FACING_FRONT, surfaceView);
     }
 
     @Override
@@ -240,5 +245,4 @@ public class CameraActivity extends AppCompatActivity
 
 
 }
-
 

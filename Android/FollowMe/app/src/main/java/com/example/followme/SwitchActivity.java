@@ -116,7 +116,8 @@ public class SwitchActivity extends AppCompatActivity {
         mBluetoothComm.init(SwitchActivity.this);
     }
 
-    void iconOff(){
+    void iconOff()
+    {
         if(mBluetoothToggle != null)
         {
             mBluetoothToggle.setBackgroundDrawable(getResources().

@@ -311,21 +311,18 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 
             //이미지를 디바이스 방향으로 회전
             Matrix matrix = new Matrix();
-
-            if(mCameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                orientation += 360;
-                matrix.setScale(-1,1);
+            if(CameraActivity.flag%2==0) {
+                matrix.setScale(-1, 1);
+        }
+            if(CameraActivity.flag%2==1) {
             }
 
+            //bitmap을 byte array로 변환
             matrix.postRotate(orientation);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
-
-            //bitmap을 byte array로 변환
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
             byte[] currentData = stream.toByteArray();
-
-
 
             //파일로 저장
             new SaveImageTask().execute(currentData);
