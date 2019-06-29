@@ -1,4 +1,4 @@
-# SmartCarrier
+# FollowMeRobot
 
 ## 스마트 캐리어 (따라오는 캐리어 프로젝트)
 
