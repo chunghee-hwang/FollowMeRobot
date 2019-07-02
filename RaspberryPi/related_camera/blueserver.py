@@ -1,6 +1,5 @@
 import bluetooth
 import os # system()
-from newcam1 import * 
 from multiprocessing import Process, Value, Queue
 # 스마트폰 연결을 기다리는 함수
 def acceptClient(server_socket):
@@ -8,7 +7,7 @@ def acceptClient(server_socket):
     print("Accepted connection from ",address)
     return client_socket
 
-def start_server(q):
+def start_server(r,g,b):
     print('start server!!')
 
     #페어링 동작 재시작
@@ -29,12 +28,7 @@ def start_server(q):
     client_socket = acceptClient(server_socket)#스마트폰이 접속할 때까지 기다림 
     #페어링 및 연결이 완료되면 속도 저하를 막기 위해 페어링 동작 중지
     os.system("sudo systemctl stop AutoPair.service")
-    
-    
-    #rgb값 판단하는 거 보내주기
-    r= Queue()
-    proc2 = Process(target = camera_func, args=(r,))
-    proc2.start()
+    #여기서 camera_func은 newcam1에서 만든 함수.
     while True:
         try:
             #스마트폰에서 메시지를 받음
@@ -44,19 +38,20 @@ def start_server(q):
             print("Client has exited")
             client_socket.close() #클라이언트 소켓 닫음
             client_socket = acceptClient(server_socket) #새로운 스마트폰 연결 기다림
-
             continue
         msg = data.decode('utf-8') #메시지를 byte[]에서 string으로 변환
         #print("Received: %s" % msg)
+        #msg가 int인지 확인한 후 에러가 뜨지 않으면 try가 계속 실행되어 r 프로세스에 msg가 넘어가서 rgb가 들어감.
+        #int(msg)에서 에러가 뜨면 except ValueError로 들어가고 방향 전환 프로세스에 msg가 넘어감
+        print(msg)
         try:
-            print(msg)
             int(msg)
-            r.put(msg)
-            print("That's int")
+            rgbStr = str(msg)
+            r.value=int(rgbStr[0:3])
+            g.value=int(rgbStr[3:6])
+            b.value=int(rgbStr[6:9])
+            print("RGB 받음")
         except ValueError:
-            print("That's not an int!")
-            q.put(msg)
-       # q.put(msg)
+            print("명령 받음")
     server_socket.close() # 블루투스 서버 소켓 닫음
     os.system("sudo systemctl restart AutoPair.service")
-    proc2.join()
