@@ -9,6 +9,8 @@ from multiprocessing import Process, Value, Queue
 #Color_Lower = (35,130,46)
 #Color_Upper = (113,255,255)
 
+dir_flag = 1
+
 def camera_func(r,g,b,gostop):
     #Camera Frame Settings
     Frame_Width = 320
@@ -82,15 +84,20 @@ def camera_func(r,g,b,gostop):
 
                      if center[0] > Frame_Width/2+40:
                         turnRight()
+                        dir_flag = 1
                      elif center[0] < Frame_Width/2-50:
                        turnLeft()
+                       dit_flag = -1
                      else:
                         forward_2() #Fast Run
                   elif radius <80 and radius > 15:
                      if center[0] > Frame_Width/2+40:
                         turnRight()
+                        dir_flag = 1
+
                      elif center[0] < Frame_Width/2-50:
                         turnLeft()
+                        dir_flag = -1
                      else:
                         forward_1() #Low Run
                   elif radius > 115:
@@ -102,6 +109,12 @@ def camera_func(r,g,b,gostop):
 
             else:
                stop() #sign
+               if dir_flag == 1:
+                   print("오른쪽으로 없어짐")
+                   turnRight()
+               elif dir_flag == -1:
+                   print("왼쪽으로 없어짐")
+                   turnLeft()
                #forward_1()
                #cv2.imshow("Frame", frame)
                if cv2.waitKey(1) & 0XFF == ord('q'):

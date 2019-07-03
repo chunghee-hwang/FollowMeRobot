@@ -7,11 +7,11 @@ def acceptClient(server_socket):
     print("Accepted connection from ",address)
     return client_socket
 
-def start_server(r,g,b):
+def start_server(r,g,b,gostop):
     print('start server!!')
 
     #페어링 동작 재시작
-    os.system("sudo systemctl restart AutoPair.service")
+    #os.system("sudo systemctl restart AutoPair.service")
 
     #내장된 블루투스 안테나 스위치 끄기
     os.system("sudo systemctl disable hciuart")
@@ -27,7 +27,7 @@ def start_server(r,g,b):
     server_socket.listen(1)
     client_socket = acceptClient(server_socket)#스마트폰이 접속할 때까지 기다림 
     #페어링 및 연결이 완료되면 속도 저하를 막기 위해 페어링 동작 중지
-    os.system("sudo systemctl stop AutoPair.service")
+    #os.system("sudo systemctl stop AutoPair.service")
     #여기서 camera_func은 newcam1에서 만든 함수.
     while True:
         try:
@@ -53,5 +53,12 @@ def start_server(r,g,b):
             print("RGB 받음")
         except ValueError:
             print("명령 받음")
+            print('msg:', msg)
+            if msg.startswith('GO'):
+                gostop.value = 1
+            elif msg.startswith('STOP'):
+                gostop.value = 0
+            else:
+                print('gostop error!')
     server_socket.close() # 블루투스 서버 소켓 닫음
-    os.system("sudo systemctl restart AutoPair.service")
+    #os.system("sudo systemctl restart AutoPair.service")

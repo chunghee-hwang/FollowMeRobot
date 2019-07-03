@@ -59,7 +59,7 @@ public class BluetoothComm {
                                         ConnectTask task = new ConnectTask(device);
                                         task.execute();
                                     } else {
-                                        ((SwitchActivity) ac).iconOn();
+                                        ((SwitchActivity) ac).iconOn(R.id.bluetooth);
                                     }
                                     //Toast.makeText(ac, "requirements fulfilled", Toast.LENGTH_SHORT).show();
                                 } catch (final Exception e) {
@@ -93,11 +93,13 @@ public class BluetoothComm {
             mConnectedTask.cancel(true);
         }
 
-        isConnected = false;
+
         if (mAc != null) {
-            ((SwitchActivity) mAc).iconOff();
-            Toast.makeText(mAc, "연결을 해제합니다.", Toast.LENGTH_SHORT).show();
+            ((SwitchActivity) mAc).iconOff(R.id.bluetooth);
+            if(isConnected)
+                Toast.makeText(mAc, "연결을 해제합니다.", Toast.LENGTH_SHORT).show();
         }
+        isConnected = false;
     }
 
     //라즈베리파이와 통신하기위한 클래스
@@ -120,7 +122,7 @@ public class BluetoothComm {
             } catch (Exception e) {
                 Log.e(TAG, "socket create failed " + e.getMessage());
             }
-            Toast.makeText(mAc, "connecting...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mAc, "연결 중...", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -165,7 +167,7 @@ public class BluetoothComm {
         if(mAc != null) {
             Toast.makeText(mAc, mConnectedDeviceName + "에 연결되었습니다.", Toast.LENGTH_SHORT).show();
 
-            ((SwitchActivity) mAc).iconOn();
+            ((SwitchActivity) mAc).iconOn(R.id.bluetooth);
         }
         isConnected = true;
 
@@ -190,7 +192,7 @@ public class BluetoothComm {
                         Log.e(TAG, "socket not created", e);
                         isConnected = false;
                         if (mAc != null) {
-                            ((SwitchActivity) mAc).iconOff();
+                            ((SwitchActivity) mAc).iconOff(R.id.bluetooth);
                         }
                     }
                 }
@@ -249,7 +251,7 @@ public class BluetoothComm {
                 Toast.makeText(mAc, "장치 연결이 끊어졌습니다.", Toast.LENGTH_SHORT).show();
                 if (mAc != null) {
                     mAc.finish();
-                    ((SwitchActivity) mAc).iconOff();
+                    ((SwitchActivity) mAc).iconOff(R.id.bluetooth);
                 }
                 isConnected = false;
             }
@@ -295,7 +297,7 @@ public class BluetoothComm {
                         @Override
                         public void run() {
                             Toast.makeText(mAc, "에러 : 서버가 다운되었습니다!", Toast.LENGTH_SHORT).show();
-                            ((SwitchActivity) mAc).iconOff();
+                            ((SwitchActivity) mAc).iconOff(R.id.bluetooth);
                         }
                     });
                 }
@@ -338,7 +340,7 @@ public class BluetoothComm {
             public void onClick(DialogInterface dialog, int which) {
                 if(mAc!=null) {
                     Toast.makeText(mAc, "연결을 취소합니다.", Toast.LENGTH_SHORT).show();
-                    ((SwitchActivity) mAc).iconOff();
+                    ((SwitchActivity) mAc).iconOff(R.id.bluetooth);
 
                     mAc.finish();
                 }
@@ -354,7 +356,12 @@ public class BluetoothComm {
                 task.execute();
             }
         });
-        builder.create().show();
+        try {
+            builder.create().show();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     //라즈베리파이에게 메시지를 전달하는 함수

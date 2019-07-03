@@ -24,7 +24,6 @@ public class CameraActivity extends AppCompatActivity
 
     private static final String TAG = "android_camera_example";
     private static final int PERMISSIONS_REQUEST_CODE = 100;
-    private final int GET_GALLERY_IMAGE = 200;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
     public static int flag=0;
@@ -119,15 +118,18 @@ public class CameraActivity extends AppCompatActivity
 
     public void back(View v) {
 //        Toast.makeText(getApplicationContext(), "button2OnClick", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+//        startActivity(intent);
+        onBackPressed();
     }
 
     public void album(View v) {
 //        Toast.makeText(getApplicationContext(), "button2OnClick", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-        startActivityForResult(intent, GET_GALLERY_IMAGE);
+//        Intent intent = new Intent(Intent.ACTION_PICK);
+//        intent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+//        startActivityForResult(intent, GET_GALLERY_IMAGE);
+        Intents intents = Intents.getInstance(getApplicationContext());
+        startActivityForResult(intents.albumIntent, Intents.GET_GALLERY_IMAGE);
     }
 
     public void conversion(View v) {
@@ -181,13 +183,17 @@ public class CameraActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+        if (requestCode == Intents.GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-            Uri selectedImageUri = data.getData();
+            Intents intents = Intents.getInstance(getApplicationContext());
+            intents.imageUri = data.getData();
             // imageview.setImageURI(selectedImageUri);
-            Intent intent = new Intent(getApplicationContext(), ColorpickerActivity.class);
-            intent.putExtra("uri", selectedImageUri);
-            startActivity(intent);
+//            Intent intent = new Intent(getApplicationContext(), ColorpickerActivity.class);
+//            intent.putExtra("uri", selectedImageUri);
+//            intents.colorpickerIntent.putExtra("uri", intents.imageUri);
+            startActivity(intents.colorpickerIntent);
+
+
 
         }
     }

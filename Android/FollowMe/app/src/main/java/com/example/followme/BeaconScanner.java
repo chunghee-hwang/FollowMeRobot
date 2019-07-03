@@ -2,6 +2,7 @@ package com.example.followme;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import com.estimote.proximity_sdk.api.ProximityZoneBuilder;
 import com.estimote.proximity_sdk.api.ProximityZoneContext;
 
 import java.util.List;
+import java.util.Set;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
@@ -27,8 +29,15 @@ public class BeaconScanner {
     private ProximityZone mZone;
     private boolean on;
     private Vibrator mVibrator;
-    BeaconScanner(Activity activity) {
+    private static BeaconScanner mBeaconScanner;
+    private BeaconScanner(Activity activity) {
         init(activity);
+    }
+    public static BeaconScanner getInstance(Activity activity)
+    {
+        if(mBeaconScanner == null)
+            mBeaconScanner = new BeaconScanner(activity);
+        return mBeaconScanner;
     }
     void init(final Activity ac) {
 
@@ -42,21 +51,25 @@ public class BeaconScanner {
                 .onError(new Function1<Throwable, Unit>() {
                     @Override
                     public Unit invoke(Throwable throwable) {
-                        Toast.makeText(ac, "proximity observer error: " + throwable, Toast.LENGTH_SHORT).show();
+                        if(!throwable.getMessage().contains("Monitoring stopped"))
+                            Toast.makeText(ac, "proximity observer error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                         return null;
                     }
                 })
+                .withLowLatencyPowerMode()
                 .build();
+
 
         mZone = new ProximityZoneBuilder()
                 .forTag("beacon5")
-                .inFarRange()
+                //.inFarRange()
+                .inCustomRange(10)
                 .onEnter(new Function1<ProximityZoneContext, Unit>() {
                     @Override
                     public Unit invoke(ProximityZoneContext proximityZoneContext)
                     {
                         if(on) {
-                            Toast.makeText(ac, "FollowMe 로봇이 5미터 안에 있습니다.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(ac, "FollowMe 로봇이 10미터 안에 있습니다.", Toast.LENGTH_LONG).show();
                             mVibrator.cancel();
                         }
                         return null;
@@ -66,7 +79,7 @@ public class BeaconScanner {
                     @Override
                     public Unit invoke(ProximityZoneContext context) {
                         if(on) {
-                            Toast.makeText(ac, "FollowMe 로봇이 5미터 밖에 있습니다.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(ac, "FollowMe 로봇이 10미터 밖에 있습니다.", Toast.LENGTH_LONG).show();
                             mVibrator.vibrate(
                                     new long[]{100, 1000, 100, 500, 100, 500, 100, 1000}
                                     , 0);
@@ -74,10 +87,12 @@ public class BeaconScanner {
                         return null;
                     }
                 })
+
                 .build();
 
 
     }
+    ProximityObserver.Handler mHandler;
     void start(final Activity ac)
     {
         on = true;
@@ -91,7 +106,9 @@ public class BeaconScanner {
                             {
                                 if(mProximityObserver!=null && mZone !=null)
                                 {
-                                    mProximityObserver.startObserving(mZone);
+                                    mHandler = mProximityObserver.startObserving(mZone);
+                                    Toast.makeText(ac, "도난 방지 시스템 on", Toast.LENGTH_SHORT).show();
+
                                 }
                                 //Toast.makeText(m, "requirements fulfilled", Toast.LENGTH_SHORT).show();
                                 return null;
@@ -116,10 +133,21 @@ public class BeaconScanner {
                             }
                         });
     }
-    void stop()
+    void stop(Activity activity)
     {
-        on = false;
         if(mVibrator!=null)
             mVibrator.cancel();
+        if(mHandler!=null)
+        {
+            mHandler.stop();
+            if(on)
+                Toast.makeText(activity, "도난 방지 시스템 off", Toast.LENGTH_SHORT).show();
+
+        }
+        on = false;
+    }
+
+    boolean isOn(){
+        return on;
     }
 }

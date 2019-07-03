@@ -11,7 +11,6 @@ import android.widget.ToggleButton;
 
 
 public class SwitchActivity extends AppCompatActivity {
-    private final int GET_GALLERY_IMAGE = 200;
     private final String TAG = "smartcarrier";
     private BeaconScanner mBeaconScanner;
     private static BluetoothComm mBluetoothComm;
@@ -29,16 +28,30 @@ public class SwitchActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         mColorRGB = intent.getStringExtra("colorRGB");
-        mVibrationToggle = findViewById(R.id.vibration);
+
+        mVibrationToggle = findViewById(R.id.vibrate);
         mFollowToggle = findViewById(R.id.follow);
         mBluetoothToggle = findViewById(R.id.bluetooth);
         ToggleHandler toggleHandler = new ToggleHandler();
         mVibrationToggle.setOnCheckedChangeListener(toggleHandler);
         mFollowToggle.setOnCheckedChangeListener(toggleHandler);
-        mBeaconScanner = new BeaconScanner(this);
-
+        mBeaconScanner = BeaconScanner.getInstance(SwitchActivity.this);
+        if(mBeaconScanner.isOn())
+        {
+            iconOn(R.id.vibrate);
+        }
+        else{
+            iconOff(R.id.vibrate);
+        }
         initBluetoothComm();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent = getIntent();
+        if(intent!=null)
+            mColorRGB = intent.getStringExtra("colorRGB");
     }
 
     private class ToggleHandler implements ToggleButton.OnCheckedChangeListener{
@@ -46,7 +59,7 @@ public class SwitchActivity extends AppCompatActivity {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             switch(buttonView.getId())
             {
-                case R.id.vibration:
+                case R.id.vibrate:
                     if(isChecked) {
                         buttonView.setBackgroundDrawable(getResources().
                                 getDrawable(R.drawable.on));
@@ -55,7 +68,7 @@ public class SwitchActivity extends AppCompatActivity {
                     else {
                         buttonView.setBackgroundDrawable(getResources().
                                 getDrawable(R.drawable.off));
-                        mBeaconScanner.stop();
+                        mBeaconScanner.stop(SwitchActivity.this);
                     }
                     break;
                 case R.id.follow:
@@ -82,14 +95,13 @@ public class SwitchActivity extends AppCompatActivity {
 
     public void button1OnClick(View v) {
 //        Toast.makeText(getApplicationContext(), "button2OnClick", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
-        startActivity(intent);
+        Intents intents = Intents.getInstance(getApplicationContext());
+        startActivity(intents.cameraIntent);
     }
 
     public void button2OnClick(View v) {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-        startActivityForResult(intent, GET_GALLERY_IMAGE);
+        Intents intents = Intents.getInstance(SwitchActivity.this);
+        startActivityForResult(intents.albumIntent, Intents.GET_GALLERY_IMAGE);
 //        Intent intent = new Intent(getApplicationContext(), SwitchActivity.class);
 //        startActivity(intent);
     }
@@ -97,13 +109,12 @@ public class SwitchActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
-
-            Uri selectedImageUri = data.getData();
+        if (requestCode == Intents.GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Intents intents = Intents.getInstance(getApplicationContext());
+            intents.imageUri = data.getData();
             // imageview.setImageURI(selectedImageUri);
-            Intent intent = new Intent(getApplicationContext(), ColorpickerActivity.class);
-            intent.putExtra("uri", selectedImageUri);
-            startActivity(intent);
+//            intents.colorpickerIntent.putExtra("uri", intents.imageUri);
+            startActivity(intents.colorpickerIntent);
         }
     }
     // -----------------------------------------------------------------------------------------
@@ -115,23 +126,37 @@ public class SwitchActivity extends AppCompatActivity {
         mBluetoothComm.init(SwitchActivity.this);
     }
 
-    void iconOff()
+    void iconOff(int id)
     {
-        if(mBluetoothToggle != null)
-        {
-            mBluetoothToggle.setBackgroundDrawable(getResources().
-                    getDrawable(R.drawable.off));
-            mFollowToggle.setEnabled(false);
+        if(id == R.id.bluetooth) {
+            if (mBluetoothToggle != null) {
+                mBluetoothToggle.setBackgroundDrawable(getResources().
+                        getDrawable(R.drawable.off));
+                mFollowToggle.setEnabled(false);
+            }
+        }
+        else if(id == R.id.vibrate) {
+            if (mVibrationToggle != null) {
+                mVibrationToggle.setBackgroundDrawable(getResources().
+                        getDrawable(R.drawable.off));
+            }
         }
     }
 
-    void iconOn()
+    void iconOn(int id)
     {
-        if(mBluetoothToggle != null)
-        {
-            mBluetoothToggle.setBackgroundDrawable(getResources().
-                    getDrawable(R.drawable.on));
-            mFollowToggle.setEnabled(true);
+        if(id == R.id.bluetooth) {
+            if (mBluetoothToggle != null) {
+                mBluetoothToggle.setBackgroundDrawable(getResources().
+                        getDrawable(R.drawable.on));
+                mFollowToggle.setEnabled(true);
+            }
+        }
+        else if(id == R.id.vibrate) {
+            if (mVibrationToggle != null) {
+                mVibrationToggle.setBackgroundDrawable(getResources().
+                        getDrawable(R.drawable.on));
+            }
         }
     }
 
