@@ -14,11 +14,11 @@ def start_server(r,g,b,gostop):
     #os.system("sudo systemctl restart AutoPair.service")
 
     #내장된 블루투스 안테나 스위치 끄기
-    os.system("sudo systemctl disable hciuart")
+    #os.system("sudo systemctl disable hciuart")
     
     #새로 연결한 블루수스 안테나 스위치 켜기
-    os.system("sudo rfkill unblock bluetooth")
-    os.system("sudo hciconfig hci0 up")
+    #os.system("sudo rfkill unblock bluetooth")
+    #os.system("sudo hciconfig hci0 up")
 
     # 블루투스 서버 소켓 생성
     server_socket=bluetooth.BluetoothSocket( bluetooth.RFCOMM )
@@ -61,4 +61,4 @@ def start_server(r,g,b,gostop):
             else:
                 print('gostop error!')
     server_socket.close() # 블루투스 서버 소켓 닫음
-    #os.system("sudo systemctl restart AutoPair.service")
+    os.system("sudo systemctl restart AutoPair.service")

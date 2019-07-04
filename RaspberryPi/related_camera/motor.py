@@ -70,8 +70,8 @@ def Reverse():
     print("backward")
     
 def brake():
-    setMotor(CH1, 10, BACKWARD)
-    setMotor(CH2, 10, BACKWARD)
+    setMotor(CH1, 10, STOP)
+    setMotor(CH2, 10, STOP)
     time.sleep(0.01)
     print("brake")
     

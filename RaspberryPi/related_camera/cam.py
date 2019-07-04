@@ -9,7 +9,10 @@ from multiprocessing import Process, Value, Queue
 #Color_Lower = (35,130,46)
 #Color_Upper = (113,255,255)
 
+dir_flag = 1
+
 def camera_func(r,g,b,gostop):
+    global dir_flag
     #Camera Frame Settings
     Frame_Width = 320
     Frame_Height = 240
@@ -18,17 +21,17 @@ def camera_func(r,g,b,gostop):
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, Frame_Width)
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, Frame_Height)
     #블루투스서버로 보내준 r로 rgb값 받음
-    print('camera_func - r: ',r,'g:',g,'b:',b)
+    print('camera_func - r: ',r.value,'g:',g.value,'b:',b.value)
     #이게 upper인데 바꾸는게 더 귀찮아서 그냥 둠. 이게 upper
 
-    Color = np.uint8([[[r,g,b]]])
+    Color = np.uint8([[[r.value,g.value,b.value]]])
     Color_mid = cv2.cvtColor(Color,cv2.COLOR_RGB2HSV)
 
     print(Color_mid)
-    Up_h = Color_mid[0][0][0]+10
+    Up_h = Color_mid[0][0][0]+5
     Up_s = Color_mid[0][0][1]
     Up_v = Color_mid[0][0][2]
-    Low_h = Color_mid[0][0][0]-10
+    Low_h = Color_mid[0][0][0]-5
     Low_s = Color_mid[0][0][1]/3
     Low_v = Color_mid[0][0][2]/3
 
@@ -38,7 +41,7 @@ def camera_func(r,g,b,gostop):
     print(Color_Upper)
     print(Color_Lower)
     try:
-      while True:
+      while True:         
          sleep(0.1)
          while gostop.value == 1:
             (_, frame) = camera.read()
@@ -82,15 +85,20 @@ def camera_func(r,g,b,gostop):
 
                      if center[0] > Frame_Width/2+40:
                         turnRight()
+                        dir_flag = 1
                      elif center[0] < Frame_Width/2-50:
                        turnLeft()
+                       dit_flag = -1
                      else:
                         forward_2() #Fast Run
                   elif radius <80 and radius > 15:
                      if center[0] > Frame_Width/2+40:
                         turnRight()
+                        dir_flag = 1
+
                      elif center[0] < Frame_Width/2-50:
                         turnLeft()
+                        dir_flag = -1
                      else:
                         forward_1() #Low Run
                   elif radius > 115:
@@ -101,13 +109,21 @@ def camera_func(r,g,b,gostop):
                   pass
 
             else:
+               print(dir_flag)
                stop() #sign
+               if dir_flag == 1:
+                   print("오른쪽으로 없어짐")
+                   turnRight()
+               elif dir_flag == -1:
+                   print("왼쪽으로 없어짐")
+                   turnLeft()
                #forward_1()
                #cv2.imshow("Frame", frame)
                if cv2.waitKey(1) & 0XFF == ord('q'):
                   break
-    except:
-      print("except")
+         brake()
+    except Error as e:
+      print(e)
 
     finally:
        camera.release()
@@ -127,6 +143,6 @@ if __name__ == '__main__':
         print('wait for rgb value')
 
     print('main - 받은 rgb값 : ', r.value, g.value, b.value)
-    camera_func(r.value, g.value, b.value, gostop)
+    camera_func(r, g, b, gostop)
 
     blueServProc.join()
