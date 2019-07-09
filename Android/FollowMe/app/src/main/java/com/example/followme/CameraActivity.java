@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,6 +15,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
+
 import java.io.IOException;
 
 
@@ -130,7 +131,10 @@ public class CameraActivity extends AppCompatActivity
 //        startActivityForResult(intent, GET_GALLERY_IMAGE);
         Intents intents = Intents.getInstance(getApplicationContext());
         startActivityForResult(intents.albumIntent, Intents.GET_GALLERY_IMAGE);
+        Toast.makeText(getApplicationContext(), "상의 사진을 선택해주세요!", Toast.LENGTH_SHORT).show();
+
     }
+
 
     public void conversion(View v) {
 
@@ -186,15 +190,13 @@ public class CameraActivity extends AppCompatActivity
         if (requestCode == Intents.GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
             Intents intents = Intents.getInstance(getApplicationContext());
-            intents.imageUri = data.getData();
+//            intents.imageUri = data.getData();
             // imageview.setImageURI(selectedImageUri);
-//            Intent intent = new Intent(getApplicationContext(), ColorpickerActivity.class);
+//            Intent intent = new Intent(getApplicationContext(), Bot_colorpickerActivity.class);
 //            intent.putExtra("uri", selectedImageUri);
-//            intents.colorpickerIntent.putExtra("uri", intents.imageUri);
-            startActivity(intents.colorpickerIntent);
-
-
-
+//            intents.botcolorpickerIntent.putExtra("uri", intents.imageUri);
+            intents.top_imageUri = data.getData();
+            startActivity(intents.topcolorpickerIntent);
         }
     }
 

@@ -370,12 +370,12 @@ public class BluetoothComm {
             mConnectedTask.write(msg);
             Log.d(TAG, "send message: " + msg);
         }
-        mAc.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(mAc, "Android: " + msg, Toast.LENGTH_SHORT).show();
-            }
-        });
+//        mAc.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                Toast.makeText(mAc, "Android: " + msg, Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     private void recvMessage(String msg) {

@@ -1,12 +1,13 @@
 package com.example.followme;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
@@ -14,7 +15,8 @@ public class SwitchActivity extends AppCompatActivity {
     private final String TAG = "smartcarrier";
     private BeaconScanner mBeaconScanner;
     private static BluetoothComm mBluetoothComm;
-    private String mColorRGB="000000000";
+    private Compass mCompass;
+    private String mColorRGB="000000000000000000";
     final static String GO = "GO";
     final static String STOP = "STOP";
     ToggleButton mFollowToggle;
@@ -27,7 +29,9 @@ public class SwitchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_switch);
 
         Intent intent = getIntent();
-        mColorRGB = intent.getStringExtra("colorRGB");
+        mColorRGB = intent.getStringExtra("topcolorRGB") + intent.getStringExtra("botcolorRGB");
+
+        Toast.makeText(getApplicationContext(), "상하의 색:" +mColorRGB, Toast.LENGTH_LONG).show();
 
         mVibrationToggle = findViewById(R.id.vibrate);
         mFollowToggle = findViewById(R.id.follow);
@@ -36,6 +40,9 @@ public class SwitchActivity extends AppCompatActivity {
         mVibrationToggle.setOnCheckedChangeListener(toggleHandler);
         mFollowToggle.setOnCheckedChangeListener(toggleHandler);
         mBeaconScanner = BeaconScanner.getInstance(SwitchActivity.this);
+        mCompass = new Compass();
+
+
         if(mBeaconScanner.isOn())
         {
             iconOn(R.id.vibrate);
@@ -51,7 +58,7 @@ public class SwitchActivity extends AppCompatActivity {
         super.onResume();
         Intent intent = getIntent();
         if(intent!=null)
-            mColorRGB = intent.getStringExtra("colorRGB");
+            mColorRGB = intent.getStringExtra("topcolorRGB") + intent.getStringExtra("botcolorRGB");
     }
 
     private class ToggleHandler implements ToggleButton.OnCheckedChangeListener{
@@ -78,8 +85,13 @@ public class SwitchActivity extends AppCompatActivity {
                                 getDrawable(R.drawable.on));
                         if (mBluetoothComm != null) {
                             mBluetoothComm.sendMessage(GO);
+//                            Toast.makeText(getApplicationContext(), "sent rgb : " + mColorRGB, Toast.LENGTH_SHORT).show();
+
                             mBluetoothComm.sendMessage(mColorRGB);
+                           // Toast.makeText(getApplicationContext(), "sent rgb : " + mColorRGB, Toast.LENGTH_SHORT).show();
                         }
+                        if(mCompass!=null && mBluetoothComm !=null)
+                            mCompass.start(SwitchActivity.this, mBluetoothComm);
                     }
                     else {
                         buttonView.setBackgroundDrawable(getResources().
@@ -87,6 +99,8 @@ public class SwitchActivity extends AppCompatActivity {
                         if (mBluetoothComm != null) {
                             mBluetoothComm.sendMessage(STOP);
                         }
+                        if(mCompass != null)
+                            mCompass.stop();
                     }
                     break;
             }
@@ -111,10 +125,9 @@ public class SwitchActivity extends AppCompatActivity {
 
         if (requestCode == Intents.GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Intents intents = Intents.getInstance(getApplicationContext());
-            intents.imageUri = data.getData();
             // imageview.setImageURI(selectedImageUri);
-//            intents.colorpickerIntent.putExtra("uri", intents.imageUri);
-            startActivity(intents.colorpickerIntent);
+//            intents.botcolorpickerIntent.putExtra("uri", intents.imageUri);
+            startActivity(intents.botcolorpickerIntent);
         }
     }
     // -----------------------------------------------------------------------------------------

@@ -46,7 +46,12 @@
            </activity>
 
         <activity
-            android:name=".ColorpickerActivity"
+            android:name=".Bot_colorpickerActivity"
+            android:screenOrientation="portrait"
+            >
+        </activity>
+        <activity
+            android:name=".Top_colorpickerActivity"
             android:screenOrientation="portrait"
             >
         </activity>
