@@ -14,7 +14,7 @@ public class Intents {
     Intent topcolorpickerIntent;
     Uri bot_imageUri, top_imageUri;
     private static Intents mIntents;
-    Intents(Context context){
+    private Intents(Context context){
         cameraIntent = new Intent(context, CameraActivity.class);
         albumIntent = new Intent(Intent.ACTION_PICK);
         albumIntent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
