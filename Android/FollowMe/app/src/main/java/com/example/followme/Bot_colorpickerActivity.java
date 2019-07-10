@@ -23,6 +23,9 @@ public class Bot_colorpickerActivity extends AppCompatActivity implements View.O
     private int mSelectedColor = -1;
     private ImageView mImageView;
     private Bitmap mBitmap;
+    private double mRatioX;
+    private double mRatioY;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,58 +35,29 @@ public class Bot_colorpickerActivity extends AppCompatActivity implements View.O
         mImageView = (ImageView) findViewById(R.id.imageView);
         final ImageButton colorPickButton = findViewById(R.id.botcolorPickButton);
         colorPickButton.setOnClickListener(this);
-        Uri selectedImageUri = intents.bot_imageUri;
-
-        //해상도 가져오기
-        WindowManager manager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        Display display = manager.getDefaultDisplay();
-        Point theScreenResolution = new Point();
-        display.getSize(theScreenResolution);
-
-        // 기본 해상도 지정(정상적으로 나오는 기기의 해상도)
-        int baseScreenResolutionX;
-        int baseScreenResolutionY;
-        try {
-            mBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
-            mImageView.setImageBitmap(mBitmap);
-            baseScreenResolutionX = mBitmap.getWidth();
-            baseScreenResolutionY = mBitmap.getHeight();
-            Log.i("ColorPicker", "bitmap.getWidth: " +baseScreenResolutionX);
-            Log.i("ColorPicker", "bitmap.getHeight: " +baseScreenResolutionY);
-            // 보정값 구하기(기본 해상도에 대한 배율 구하기)
-            final double ratioX = baseScreenResolutionX / (double)theScreenResolution.x;
-            final double ratioY = baseScreenResolutionY / (double)theScreenResolution.y;
-            mImageView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                        int x = (int) (event.getX() * ratioX);
-                        int y = (int) (event.getY() * ratioY);
-                        //Matrix inverse = new Matrix();
-                        //v.getMatrix().invert(inverse);
-                        //float[] touchPoint = new float[] {event.getX(), event.getY()};
-                        //inverse.mapPoints(touchPoint);
-                        //int x=Integer.valueOf((int)touchPoint[0]);
-                        //int y=Integer.valueOf((int)touchPoint[1]);
-                        Log.i("ColorPicker", "x: " + event.getX());
-                        Log.i("ColorPicker", "y: " + event.getY());
-                        Log.i("ColorPicker", "rx: " + x);
-                        Log.i("ColorPicker", "ry: " + y);
-
-                        mSelectedColor = mBitmap.getPixel(x,y);
-
-                        colorPickButton.setBackgroundColor(mSelectedColor);
-                    }
-                    return true;
+        updateBitmap();
+        mImageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    int x = (int) (event.getX() * mRatioX);
+                    int y = (int) (event.getY() * mRatioY);
+                    //Matrix inverse = new Matrix();
+                    //v.getMatrix().invert(inverse);
+                    //float[] touchPoint = new float[] {event.getX(), event.getY()};
+                    //inverse.mapPoints(touchPoint);
+                    //int x=Integer.valueOf((int)touchPoint[0]);
+                    //int y=Integer.valueOf((int)touchPoint[1]);
+                    Log.i("ColorPicker", "x: " + event.getX());
+                    Log.i("ColorPicker", "y: " + event.getY());
+                    Log.i("ColorPicker", "rx: " + x);
+                    Log.i("ColorPicker", "ry: " + y);
+                    mSelectedColor = mBitmap.getPixel(x, y);
+                    colorPickButton.setBackgroundColor(mSelectedColor);
                 }
-            });
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -92,7 +66,6 @@ public class Bot_colorpickerActivity extends AppCompatActivity implements View.O
         Intents intents = Intents.getInstance(getApplicationContext());
         Uri selectedImageUri = intents.bot_imageUri;
         if(mImageView!=null) {
-
             try {
                 mBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
                 mImageView.setImageBitmap(mBitmap);
@@ -100,9 +73,41 @@ public class Bot_colorpickerActivity extends AppCompatActivity implements View.O
             catch (Exception e){
                 e.printStackTrace();
             }
-
         }
+    }
 
+    private void updateBitmap()
+    {
+        Intents intents = Intents.getInstance(getApplicationContext());
+        Uri selectedImageUri = intents.bot_imageUri;
+        if (mImageView != null)
+        {
+            try {
+                mBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+                mImageView.setImageBitmap(mBitmap);
+                int baseScreenResolutionX;
+                int baseScreenResolutionY;
+
+                //해상도 가져오기
+                WindowManager manager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+                Display display = manager.getDefaultDisplay();
+                Point theScreenResolution = new Point();
+                display.getSize(theScreenResolution);
+//              mBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+//              mImageView.setImageBitmap(mBitmap);
+                baseScreenResolutionX = mBitmap.getWidth();
+                baseScreenResolutionY = mBitmap.getHeight();
+                Log.i("ColorPicker", "bitmap.getWidth: " + baseScreenResolutionX);
+                Log.i("ColorPicker", "bitmap.getHeight: " + baseScreenResolutionY);
+                // 보정값 구하기(기본 해상도에 대한 배율 구하기)
+                mRatioX = baseScreenResolutionX / (double) theScreenResolution.x;
+                mRatioY = baseScreenResolutionY / (double) theScreenResolution.y;
+                Log.i("ColorPicker", "bitmap.getWidth: " + baseScreenResolutionX);
+                Log.i("ColorPicker", "bitmap.getHeight: " + baseScreenResolutionY);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

@@ -55,42 +55,42 @@ def forward_1():
     setMotor(CH1, 45, FORWARD)
     setMotor(CH2, 45, FORWARD)
     time.sleep(0.01)
-    print("slow forward")
+    #print("slow forward")
 
 def forward_2():
     setMotor(CH1, 60, FORWARD)
     setMotor(CH2, 60, FORWARD)
     time.sleep(0.01)
-    print("fast forward")
+    #print("fast forward")
 
 def Reverse():
     setMotor(CH1, 45, BACKWARD)
     setMotor(CH2, 45, BACKWARD)
     time.sleep(0.01)
-    print("backward")
+    #print("backward")
     
 def brake():
     setMotor(CH1, 10, STOP)
     setMotor(CH2, 10, STOP)
     time.sleep(0.01)
-    print("brake")
+    #print("brake")
     
 def stop():
     setMotor(CH1, 45, STOP)
     setMotor(CH2, 45, STOP)
-    print("stop")
+    #print("stop")
 
 def turnLeft():
     setMotor(CH1, 45, BACKWARD)
     setMotor(CH2, 45, FORWARD)
     time.sleep(0.01)
-    print("left")
+    #print("left")
 
 def turnRight():
     setMotor(CH1, 45, FORWARD)
     setMotor(CH2, 45, BACKWARD)
     time.sleep(0.01)
-    print("right")
+    #print("right")
 
 
 def leftturn2():

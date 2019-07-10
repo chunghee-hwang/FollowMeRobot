@@ -118,17 +118,10 @@ public class CameraActivity extends AppCompatActivity
     }
 
     public void back(View v) {
-//        Toast.makeText(getApplicationContext(), "button2OnClick", Toast.LENGTH_SHORT).show();
-//        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-//        startActivity(intent);
         onBackPressed();
     }
 
     public void album(View v) {
-//        Toast.makeText(getApplicationContext(), "button2OnClick", Toast.LENGTH_SHORT).show();
-//        Intent intent = new Intent(Intent.ACTION_PICK);
-//        intent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-//        startActivityForResult(intent, GET_GALLERY_IMAGE);
         Intents intents = Intents.getInstance(getApplicationContext());
         startActivityForResult(intents.albumIntent, Intents.GET_GALLERY_IMAGE);
         Toast.makeText(getApplicationContext(), "상의 사진을 선택해주세요!", Toast.LENGTH_SHORT).show();
@@ -190,11 +183,6 @@ public class CameraActivity extends AppCompatActivity
         if (requestCode == Intents.GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
             Intents intents = Intents.getInstance(getApplicationContext());
-//            intents.imageUri = data.getData();
-            // imageview.setImageURI(selectedImageUri);
-//            Intent intent = new Intent(getApplicationContext(), Bot_colorpickerActivity.class);
-//            intent.putExtra("uri", selectedImageUri);
-//            intents.botcolorpickerIntent.putExtra("uri", intents.imageUri);
             intents.top_imageUri = data.getData();
             startActivity(intents.topcolorpickerIntent);
         }

@@ -19,10 +19,8 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intents.cameraIntent);
     }
 
-    //
+    //앨범 버튼이 눌렸을 때
     public void button2OnClick(View v) {
-//        Intent intent = new Intent(Intent.ACTION_PICK);
-//        intent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
         Intents intents = Intents.getInstance(MainActivity.this);
         startActivityForResult(intents.albumIntent, Intents.GET_GALLERY_IMAGE);
         Toast.makeText(getApplicationContext(), "상의 사진을 선택해주세요!", Toast.LENGTH_SHORT).show();
@@ -33,13 +31,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == Intents.GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Intents intents = Intents.getInstance(getApplicationContext());
             intents.top_imageUri = data.getData();
-
-//            Intent intent = new Intent(getApplicationContext(), Bot_colorpickerActivity.class);
-//            intent.putExtra("uri", selectedImageUri);
-//            startActivity(intent);
-
-
-//            intents.botcolorpickerIntent.putExtra("uri", intents.imageUri);
             startActivity(intents.topcolorpickerIntent);
         }
     }

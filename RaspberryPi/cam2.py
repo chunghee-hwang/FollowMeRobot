@@ -106,13 +106,13 @@ def camera_func(r,g,b,r2,g2,b2,gostop,direction):
                   if (radius < 15 and radius > 5):
 
                      if (Topcenter[0] > Frame_Width/2+55) and (Bottomcenter[0] > Frame_Width/2+55):
-                         #if (direction.value==1 or direction.value==0):
+                         if (direction.value==1 or direction.value==0):
                              turnRight()
                              
                              dir_flag = 1
                              
                      elif (Topcenter[0] < Frame_Width/2-55) and (Bottomcenter[0] > Frame_Width/2-55):
-                         #if (direction.value==-1 or direction.value==0):
+                         if (direction.value==-1 or direction.value==0):
                              turnLeft()
                              dit_flag = -1
                              
@@ -122,15 +122,15 @@ def camera_func(r,g,b,r2,g2,b2,gostop,direction):
                      		forward_2() #Fast Run
                          
                   elif (radius <80 and radius > 15):
-                    if (Topcenter[0] > Frame_Width/2+32) and (Bottomcenter[0] > Frame_Width/2+32):
-                        #if (direction.value==1 or direction.value==0):
+                    if (Topcenter[0] > Frame_Width/2+32) and (Bottomcenter[0] > Frame_Width/2+32) and (Topcenter[1]<Bottomcenter[1]):
+                        if (direction.value==1 or direction.value==0):
                             turnRight()
                             dir_flag = 1
-                    elif (Topcenter[0] < Frame_Width/2-32) and (Bottomcenter[0] > Frame_Width/2-32):
-                        #if  (direction.value==-1 or direction.value==0):
+                    elif (Topcenter[0] < Frame_Width/2-32) and (Bottomcenter[0] > Frame_Width/2-32) and (Topcenter[1]<Bottomcenter[1]):
+                        if  (direction.value==-1 or direction.value==0):
                             turnLeft()
                             dir_flag = -1
-                    elif (Frame_Width/2-32 < Topcenter[0] < Frame_Width/2+32 and Frame_Width/2-32 < Bottomcenter[0] < Frame_Width/2+32):
+                    elif (Frame_Width/2-32 < Topcenter[0] < Frame_Width/2+32 and Frame_Width/2-32 < Bottomcenter[0] < Frame_Width/2+32) and (Topcenter[1]<Bottomcenter[1]):
                     #elif (direction.value==0):
                     #else:
                     	forward_1() #Low Run

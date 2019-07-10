@@ -11,7 +11,7 @@ def start_server(r,g,b,r2,g2,b2, gostop, direction):
     print('start server!!')
 
     #페어링 동작 재시작
-    #os.system("sudo systemctl restart AutoPair.service")
+    os.system("sudo systemctl restart AutoPair.service")
 
     #내장된 블루투스 안테나 스위치 끄기
     #os.system("sudo systemctl disable hciuart")
@@ -70,4 +70,4 @@ def start_server(r,g,b,r2,g2,b2, gostop, direction):
                 direction.value = 1
                 
     server_socket.close() # 블루투스 서버 소켓 닫음
-    #os.system("sudo systemctl restart AutoPair.service")
+    os.system("sudo systemctl restart AutoPair.service")

@@ -3,7 +3,6 @@ package com.example.followme;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -85,10 +84,8 @@ public class SwitchActivity extends AppCompatActivity {
                                 getDrawable(R.drawable.on));
                         if (mBluetoothComm != null) {
                             mBluetoothComm.sendMessage(GO);
-//                            Toast.makeText(getApplicationContext(), "sent rgb : " + mColorRGB, Toast.LENGTH_SHORT).show();
 
                             mBluetoothComm.sendMessage(mColorRGB);
-                           // Toast.makeText(getApplicationContext(), "sent rgb : " + mColorRGB, Toast.LENGTH_SHORT).show();
                         }
                         if(mCompass!=null && mBluetoothComm !=null)
                             mCompass.start(SwitchActivity.this, mBluetoothComm);
@@ -108,7 +105,6 @@ public class SwitchActivity extends AppCompatActivity {
     }
 
     public void button1OnClick(View v) {
-//        Toast.makeText(getApplicationContext(), "button2OnClick", Toast.LENGTH_SHORT).show();
         Intents intents = Intents.getInstance(getApplicationContext());
         startActivity(intents.cameraIntent);
     }
@@ -116,8 +112,7 @@ public class SwitchActivity extends AppCompatActivity {
     public void button2OnClick(View v) {
         Intents intents = Intents.getInstance(SwitchActivity.this);
         startActivityForResult(intents.albumIntent, Intents.GET_GALLERY_IMAGE);
-//        Intent intent = new Intent(getApplicationContext(), SwitchActivity.class);
-//        startActivity(intent);
+        Toast.makeText(getApplicationContext(), "상의 사진을 선택해주세요!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -125,9 +120,8 @@ public class SwitchActivity extends AppCompatActivity {
 
         if (requestCode == Intents.GET_GALLERY_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Intents intents = Intents.getInstance(getApplicationContext());
-            // imageview.setImageURI(selectedImageUri);
-//            intents.botcolorpickerIntent.putExtra("uri", intents.imageUri);
-            startActivity(intents.botcolorpickerIntent);
+            intents.top_imageUri = data.getData();
+            startActivity(intents.topcolorpickerIntent);
         }
     }
     // -----------------------------------------------------------------------------------------
@@ -180,10 +174,6 @@ public class SwitchActivity extends AppCompatActivity {
     // -----------------------------------------------------------------------------------------
     // 블루투스 통신 코드 끝
     // -----------------------------------------------------------------------------------------
-
-
-
-
     //앱이 종료될때 호출되는 함수
     @Override
     protected void onDestroy()
