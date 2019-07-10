@@ -7,7 +7,7 @@ def acceptClient(server_socket):
     print("Accepted connection from ",address)
     return client_socket
 
-def start_server(r,g,b,gostop):
+def start_server(r,g,b,r2,g2,b2, gostop, direction):
     print('start server!!')
 
     #페어링 동작 재시작
@@ -50,6 +50,10 @@ def start_server(r,g,b,gostop):
             r.value=int(rgbStr[0:3])
             g.value=int(rgbStr[3:6])
             b.value=int(rgbStr[6:9])
+            r2.value=int(rgbStr[9:12])
+            g2.value=int(rgbStr[12:15])
+            b2.value=int(rgbStr[15:18])
+
             print("RGB 받음")
         except ValueError:
             print("명령 받음")
@@ -58,7 +62,12 @@ def start_server(r,g,b,gostop):
                 gostop.value = 1
             elif msg.startswith('STOP'):
                 gostop.value = 0
-            else:
-                print('gostop error!')
+            elif msg.startswith('STRAIGHT'):
+                direction.value = 0
+            elif msg.startswith('LEFT'):
+                direction.value = -1
+            elif msg.startswith('RIGHT'):
+                direction.value = 1
+                
     server_socket.close() # 블루투스 서버 소켓 닫음
-    os.system("sudo systemctl restart AutoPair.service")
+    #os.system("sudo systemctl restart AutoPair.service")
