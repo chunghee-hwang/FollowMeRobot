@@ -63,17 +63,7 @@ public class Bot_colorpickerActivity extends AppCompatActivity implements View.O
     @Override
     protected void onResume() {
         super.onResume();
-        Intents intents = Intents.getInstance(getApplicationContext());
-        Uri selectedImageUri = intents.bot_imageUri;
-        if(mImageView!=null) {
-            try {
-                mBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
-                mImageView.setImageBitmap(mBitmap);
-            }
-            catch (Exception e){
-                e.printStackTrace();
-            }
-        }
+        updateBitmap();
     }
 
     private void updateBitmap()

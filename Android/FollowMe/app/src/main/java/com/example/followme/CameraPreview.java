@@ -25,6 +25,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
 // 카메라에서 가져온 영상을 보여주는 카메라 프리뷰 클래스
@@ -297,36 +298,45 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
     Camera.PictureCallback jpegCallback = new Camera.PictureCallback() {
         public void onPictureTaken(byte[] data, Camera camera) {
 
-            //이미지의 너비와 높이 결정
-            int w = camera.getParameters().getPictureSize().width;
-            int h = camera.getParameters().getPictureSize().height;
-            int orientation = calculatePreviewOrientation(mCameraInfo, mDisplayOrientation);
+            try {
+                //이미지의 너비와 높이 결정
+                int w = camera.getParameters().getPictureSize().width;
+                int h = camera.getParameters().getPictureSize().height;
+                int orientation = calculatePreviewOrientation(mCameraInfo, mDisplayOrientation);
 
 
-            //byte array를 bitmap으로 변환
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+                //byte array를 bitmap으로 변환
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
 
-            //이미지를 디바이스 방향으로 회전
-            Matrix matrix = new Matrix();
-            if(CameraActivity.flag%2==0) {
-                matrix.setScale(-1, 1);
-        }
-            if(CameraActivity.flag%2==1) {
+                //이미지를 디바이스 방향으로 회전
+                Matrix matrix = new Matrix();
+                if (CameraActivity.flag % 2 == 0) {
+                    matrix.setScale(-1, 1);
+                }
+                if (CameraActivity.flag % 2 == 1) {
+                }
+
+                //bitmap을 byte array로 변환
+                matrix.postRotate(orientation);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                byte[] currentData = stream.toByteArray();
+
+                //파일로 저장
+                new SaveImageTask().execute(currentData);
             }
-
-            //bitmap을 byte array로 변환
-            matrix.postRotate(orientation);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-            byte[] currentData = stream.toByteArray();
-
-            //파일로 저장
-            new SaveImageTask().execute(currentData);
-
+            catch (Exception e)
+            {
+                Toast.makeText(getContext(), e.getMessage(),Toast.LENGTH_LONG).show();
+            }
+            catch(Error e)
+            {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            }
         }
     };
 
@@ -379,6 +389,10 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+            catch (Exception e)
+            {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             }
 
             return null;
