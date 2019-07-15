@@ -6,8 +6,11 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.estimote.mustard.rx_goodness.rx_requirements_wizard.Requirement;
@@ -53,6 +56,7 @@ public class BluetoothComm {
                             @Override
                             public Unit invoke() {
                                 try {
+                                    ((SwitchActivity) mAc).mFollowToggle.setEnabled(false);
                                     mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                                     if (!isConnected) {
                                         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice("8C:88:2B:00:09:A0");
@@ -72,8 +76,16 @@ public class BluetoothComm {
                         new Function1<List<? extends Requirement>, Unit>() {
                             @Override
                             public Unit invoke(List<? extends Requirement> requirements) {
-                                Toast.makeText(ac, "요구사항이 부족합니다: " + requirements, Toast.LENGTH_SHORT).show();
-                                ac.finish();
+                                //Toast.makeText(ac, "요구사항이 부족합니다: " + requirements, Toast.LENGTH_SHORT).show();
+                                Snackbar.make(mAc.findViewById(R.id.layout_switch), "요구사항이 부족합니다: " + requirements,
+                                        Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(View view) {
+                                        ac.finish();
+                                    }
+                                }).show();
+
                                 return null;
                             }
                         },
@@ -81,8 +93,17 @@ public class BluetoothComm {
                         new Function1<Throwable, Unit>() {
                             @Override
                             public Unit invoke(Throwable throwable) {
-                                Toast.makeText(ac, "요구사항 에러: " + throwable, Toast.LENGTH_SHORT).show();
-                                ac.finish();
+                                //Toast.makeText(ac, "요구사항 에러: " + throwable, Toast.LENGTH_SHORT).show();
+
+
+                                Snackbar.make(mAc.findViewById(R.id.layout_switch), "요구사항 에러: ",
+                                        Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(View view) {
+                                        ac.finish();
+                                    }
+                                }).show();
                                 return null;
                             }
                         });
@@ -122,7 +143,9 @@ public class BluetoothComm {
             } catch (Exception e) {
                 Log.e(TAG, "socket create failed " + e.getMessage());
             }
-            Toast.makeText(mAc, "연결 중...", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mAc, "연결 중...", Toast.LENGTH_SHORT).show();
+            Snackbar.make(mAc.findViewById(R.id.layout_switch), "연결 중...", Snackbar.LENGTH_LONG).show();
+
         }
 
         @Override
@@ -154,8 +177,16 @@ public class BluetoothComm {
             } else {
 
                 isConnectionError = true;
-                Toast.makeText(mAc, "장치에 연결하지 못했습니다.", Toast.LENGTH_SHORT).show();
-                showPairedDevicesDialog();
+                //Toast.makeText(mAc, "장치에 연결하지 못했습니다.", Toast.LENGTH_SHORT).show();
+                Snackbar snackbar = Snackbar.make(mAc.findViewById(R.id.layout_switch), "장치에 연결하지 못했습니다.", Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction("페어링 목록 보기", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showPairedDevicesDialog();
+                    }
+                });
+                snackbar.show();
+                //showPairedDevicesDialog();
                 isConnected = false;
             }
         }
@@ -165,9 +196,11 @@ public class BluetoothComm {
     private void connected(BluetoothSocket socket) {
         mConnectedTask = new ConnectedTask(socket);
         if(mAc != null) {
-            Toast.makeText(mAc, mConnectedDeviceName + "에 연결되었습니다.", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mAc, mConnectedDeviceName + "에 연결되었습니다.", Toast.LENGTH_SHORT).show();
+            Snackbar.make(mAc.findViewById(R.id.layout_switch), mConnectedDeviceName + "에 연결되었습니다", Snackbar.LENGTH_LONG).show();
 
             ((SwitchActivity) mAc).iconOn(R.id.bluetooth);
+            ((SwitchActivity) mAc).mFollowToggle.setEnabled(true);
         }
         isConnected = true;
 
@@ -248,7 +281,6 @@ public class BluetoothComm {
             if (!isSucess) {
                 closeSocket();
                 isConnectionError = true;
-                Toast.makeText(mAc, "장치 연결이 끊어졌습니다.", Toast.LENGTH_SHORT).show();
                 if (mAc != null) {
                     mAc.finish();
                     ((SwitchActivity) mAc).iconOff(R.id.bluetooth);
@@ -297,13 +329,14 @@ public class BluetoothComm {
                         @Override
                         public void run() {
                             Toast.makeText(mAc, "에러 : 서버가 다운되었습니다!", Toast.LENGTH_SHORT).show();
+                            cancel(true);
                             ((SwitchActivity) mAc).iconOff(R.id.bluetooth);
                         }
                     });
                 }
 
-
-                mAc.finish();
+                if(mAc!=null)
+                    mAc.finish();
             }
 
         }
@@ -313,7 +346,6 @@ public class BluetoothComm {
     public void showPairedDevicesDialog() {
         //현재 페어링된 장치 목록 가져옴.
         if (mBluetoothAdapter == null) {
-            Toast.makeText(mAc, "bluetooth adapter is null!", Toast.LENGTH_LONG).show();
             return;
         }
         Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
@@ -324,8 +356,16 @@ public class BluetoothComm {
 
         //만약 페어링된 장치가 없다면
         if (pairedDevices.length == 0) {
-            Toast.makeText(mAc, "페어링된 장치가 없습니다. 페어링 먼저 진행해주세요!", Toast.LENGTH_SHORT).show();
-            mAc.finish();
+            //Toast.makeText(mAc, "페어링된 장치가 없습니다. 페어링 먼저 진행해주세요!", Toast.LENGTH_SHORT).show();
+            Snackbar.make(mAc.findViewById(R.id.layout_switch), "페어링된 장치가 없습니다. 페어링 먼저 진행해주세요!",
+                    Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+
+                @Override
+                public void onClick(View view) {
+                    mAc.finish();
+                }
+            }).show();
+
             return;
         }
         items = new String[pairedDevices.length];
@@ -341,7 +381,6 @@ public class BluetoothComm {
                 if(mAc!=null) {
                     Toast.makeText(mAc, "연결을 취소합니다.", Toast.LENGTH_SHORT).show();
                     ((SwitchActivity) mAc).iconOff(R.id.bluetooth);
-
                     mAc.finish();
                 }
                 isConnected = false;

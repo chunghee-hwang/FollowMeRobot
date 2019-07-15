@@ -184,7 +184,10 @@ public class CameraActivity extends AppCompatActivity
 
             Intents intents = Intents.getInstance(getApplicationContext());
             intents.top_imageUri = data.getData();
+            Top_colorpickerActivity.onCreateCalled = false;
             startActivity(intents.topcolorpickerIntent);
+
+
         }
     }
 

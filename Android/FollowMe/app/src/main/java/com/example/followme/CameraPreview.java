@@ -307,7 +307,7 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 
                 //byte array를 bitmap으로 변환
                 BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                options.inPreferredConfig = Bitmap.Config.RGB_565;
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
 
@@ -323,7 +323,7 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
                 matrix.postRotate(orientation);
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 60, stream);
                 byte[] currentData = stream.toByteArray();
 
                 //파일로 저장
@@ -350,7 +350,7 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 
             try {
 
-                File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/camtest");
+                File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/FollowMe");
                 if (!path.exists()) {
                     path.mkdirs();
                 }

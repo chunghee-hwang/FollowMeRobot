@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,17 +30,20 @@ public class BeaconScanner {
     private ProximityObserver mProximityObserver;
     private ProximityZone mZone;
     private boolean on;
+    private boolean toofar = true;
     private Vibrator mVibrator;
     private static BeaconScanner mBeaconScanner;
+
     private BeaconScanner(Activity activity) {
         init(activity);
     }
-    public static BeaconScanner getInstance(Activity activity)
-    {
-        if(mBeaconScanner == null)
+
+    public static BeaconScanner getInstance(Activity activity) {
+        if (mBeaconScanner == null)
             mBeaconScanner = new BeaconScanner(activity);
         return mBeaconScanner;
     }
+
     void init(final Activity ac) {
 
         //beacon 관련 코드 넣기
@@ -51,8 +56,10 @@ public class BeaconScanner {
                 .onError(new Function1<Throwable, Unit>() {
                     @Override
                     public Unit invoke(Throwable throwable) {
-                        if(!throwable.getMessage().contains("Monitoring stopped"))
-                            Toast.makeText(ac, "proximity observer error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                        if (!throwable.getMessage().contains("Monitoring stopped"))
+                            //Toast.makeText(ac, "proximity observer error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            Snackbar.make(ac.findViewById(R.id.layout_switch), "proximity observer error: " + throwable.getMessage(), Snackbar.LENGTH_SHORT).show();
+
                         return null;
                     }
                 })
@@ -62,14 +69,23 @@ public class BeaconScanner {
 
         mZone = new ProximityZoneBuilder()
                 .forTag("beacon5")
-                //.inFarRange()
-                .inCustomRange(10)
+                .inFarRange()
+                //.inCustomRange(10)
                 .onEnter(new Function1<ProximityZoneContext, Unit>() {
                     @Override
-                    public Unit invoke(ProximityZoneContext proximityZoneContext)
-                    {
-                        if(on) {
-                            Toast.makeText(ac, "FollowMe 로봇이 10미터 안에 있습니다.", Toast.LENGTH_LONG).show();
+                    public Unit invoke(ProximityZoneContext proximityZoneContext) {
+                        if (on) {
+                            //Toast.makeText(ac, "FollowMe 로봇이 10미터 안에 있습니다.", Toast.LENGTH_SHORT).show();
+
+                            if(toofar) {
+                                Snackbar.make(ac.findViewById(R.id.layout_switch), "FollowMe 로봇이 10미터 안에 있습니다.",
+                                        Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                    }
+                                }).show();
+                                toofar = false;
+                            }
                             mVibrator.cancel();
                         }
                         return null;
@@ -78,8 +94,18 @@ public class BeaconScanner {
                 .onExit(new Function1<ProximityZoneContext, Unit>() {
                     @Override
                     public Unit invoke(ProximityZoneContext context) {
-                        if(on) {
-                            Toast.makeText(ac, "FollowMe 로봇이 10미터 밖에 있습니다.", Toast.LENGTH_LONG).show();
+                        if (on) {
+                            //Toast.makeText(ac, "FollowMe 로봇이 10미터 밖에 있습니다.", Toast.LENGTH_SHORT).show();
+                            //Snackbar.make(ac.findViewById(R.id.layout_switch), "FollowMe 로봇이 10미터 밖에 있습니다.", Snackbar.LENGTH_INDEFINITE).show();
+                            if(!toofar) {
+                                Snackbar.make(ac.findViewById(R.id.layout_switch), "FollowMe 로봇이 10미터 밖에 있습니다.",
+                                        Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                    }
+                                }).show();
+                                toofar = true;
+                            }
                             mVibrator.vibrate(
                                     new long[]{100, 1000, 100, 500, 100, 500, 100, 1000}
                                     , 0);
@@ -92,9 +118,11 @@ public class BeaconScanner {
 
 
     }
+
     ProximityObserver.Handler mHandler;
-    void start(final Activity ac)
-    {
+
+    void start(final Activity ac) {
+        if (on) return;
         on = true;
         RequirementsWizardFactory
                 .createEstimoteRequirementsWizard()
@@ -102,12 +130,11 @@ public class BeaconScanner {
                         // onRequirementsFulfilled
                         new Function0<Unit>() {
                             @Override
-                            public Unit invoke()
-                            {
-                                if(mProximityObserver!=null && mZone !=null)
-                                {
+                            public Unit invoke() {
+                                if (mProximityObserver != null && mZone != null) {
                                     mHandler = mProximityObserver.startObserving(mZone);
-                                    Toast.makeText(ac, "도난 방지 시스템 on", Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(ac, "도난 방지 시스템 on", Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(ac.findViewById(R.id.layout_switch), "도난 방지 시스템 on", Snackbar.LENGTH_LONG).show();
 
                                 }
                                 //Toast.makeText(m, "requirements fulfilled", Toast.LENGTH_SHORT).show();
@@ -118,8 +145,16 @@ public class BeaconScanner {
                         new Function1<List<? extends Requirement>, Unit>() {
                             @Override
                             public Unit invoke(List<? extends Requirement> requirements) {
-                                Toast.makeText(ac, "requirements missing: " + requirements, Toast.LENGTH_SHORT).show();
-                                ac.finish();
+                                //Toast.makeText(ac, "requirements missing: " + requirements, Toast.LENGTH_SHORT).show();
+
+                                Snackbar.make(ac.findViewById(R.id.layout_switch), "권한 부족: " + requirements,
+                                        Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(View view) {
+                                        ac.finish();
+                                    }
+                                }).show();
                                 return null;
                             }
                         },
@@ -127,27 +162,41 @@ public class BeaconScanner {
                         new Function1<Throwable, Unit>() {
                             @Override
                             public Unit invoke(Throwable throwable) {
-                                Toast.makeText(ac, "requirements error: " + throwable, Toast.LENGTH_SHORT).show();
-                                ac.finish();
+                                //Toast.makeText(ac, "requirements error: " + throwable, Toast.LENGTH_SHORT).show();
+                                Snackbar.make(ac.findViewById(R.id.layout_switch), "권한 에러: " + throwable,
+                                        Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(View view) {
+                                        ac.finish();
+                                    }
+                                }).show();
                                 return null;
                             }
                         });
     }
-    void stop(Activity activity)
-    {
-        if(mVibrator!=null)
+
+    void stop(Activity ac) {
+        if (!on) return;
+        if (mVibrator != null)
             mVibrator.cancel();
-        if(mHandler!=null)
-        {
+        if (mHandler != null) {
             mHandler.stop();
-            if(on)
-                Toast.makeText(activity, "도난 방지 시스템 off", Toast.LENGTH_SHORT).show();
+            if (on)
+                //Toast.makeText(activity, "도난 방지 시스템 off", Toast.LENGTH_SHORT).show();
+                try {
+                    Snackbar.make(ac.findViewById(R.id.layout_switch), "도난 방지 시스템 off", Snackbar.LENGTH_LONG).show();
+                }catch (Exception e)
+                {
+                    Toast.makeText(ac, "도난 방지 시스템 off", Toast.LENGTH_SHORT).show();
+                }
 
         }
         on = false;
+        toofar = true;
     }
 
-    boolean isOn(){
+    boolean isOn() {
         return on;
     }
 }
