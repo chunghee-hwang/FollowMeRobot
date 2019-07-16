@@ -118,7 +118,7 @@ public class SwitchActivity extends AppCompatActivity {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])
                 || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])) {
 
-            Snackbar.make(findViewById(R.id.layout_main), "이 앱을 실행하려면 외부 저장소 접근 권한이 필요합니다.",
+            Snackbar.make(findViewById(R.id.layout_switch), "이 앱을 실행하려면 외부 저장소 접근 권한이 필요합니다.",
                     Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
 
                 @Override
