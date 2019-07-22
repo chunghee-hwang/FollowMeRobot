@@ -21,8 +21,7 @@ public class SwitchActivity extends AppCompatActivity {
     private static BluetoothComm mBluetoothComm;
     private Compass mCompass;
     private String mColorRGB="000000000000000000";
-    final static String GO = "GO";
-    final static String STOP = "STOP";
+
     ToggleButton mFollowToggle;
     ToggleButton mVibrationToggle;
     ImageView mBluetoothToggle;
@@ -89,8 +88,7 @@ public class SwitchActivity extends AppCompatActivity {
                     {
                         iconOn(id);
                         if (mBluetoothComm != null) {
-                            mBluetoothComm.sendMessage(GO);
-
+                            mBluetoothComm.sendMessage(BluetoothComm.GO);
                             mBluetoothComm.sendMessage(mColorRGB);
                         }
                         if(mCompass!=null && mBluetoothComm !=null)
@@ -99,7 +97,7 @@ public class SwitchActivity extends AppCompatActivity {
                     else {
                         iconOff(id);
                         if (mBluetoothComm != null) {
-                            mBluetoothComm.sendMessage(STOP);
+                            mBluetoothComm.sendMessage(BluetoothComm.STOP);
                         }
                         if(mCompass != null)
                             mCompass.stop();
@@ -189,6 +187,7 @@ public class SwitchActivity extends AppCompatActivity {
                 mBluetoothToggle.setBackgroundDrawable(getResources().
                         getDrawable(R.drawable.on));
                 mFollowToggle.setEnabled(true);
+                mVibrationToggle.setEnabled(true);
             }
         }
         else if(id == R.id.follow)

@@ -2,11 +2,13 @@ package com.example.followme;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +32,6 @@ public class BeaconScanner {
     private ProximityObserver mProximityObserver;
     private ProximityZone mZone;
     private boolean on;
-    private boolean toofar = true;
     private Vibrator mVibrator;
     private static BeaconScanner mBeaconScanner;
 
@@ -76,16 +77,13 @@ public class BeaconScanner {
                     public Unit invoke(ProximityZoneContext proximityZoneContext) {
                         if (on) {
                             //Toast.makeText(ac, "FollowMe 로봇이 10미터 안에 있습니다.", Toast.LENGTH_SHORT).show();
+                            Snackbar.make(ac.findViewById(R.id.layout_switch), "FollowMe 로봇이 10미터 안에 있습니다.",
+                                    Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                }
+                            }).show();
 
-                            if(toofar) {
-                                Snackbar.make(ac.findViewById(R.id.layout_switch), "FollowMe 로봇이 10미터 안에 있습니다.",
-                                        Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                    }
-                                }).show();
-                                toofar = false;
-                            }
                             mVibrator.cancel();
                         }
                         return null;
@@ -97,15 +95,14 @@ public class BeaconScanner {
                         if (on) {
                             //Toast.makeText(ac, "FollowMe 로봇이 10미터 밖에 있습니다.", Toast.LENGTH_SHORT).show();
                             //Snackbar.make(ac.findViewById(R.id.layout_switch), "FollowMe 로봇이 10미터 밖에 있습니다.", Snackbar.LENGTH_INDEFINITE).show();
-                            if(!toofar) {
-                                Snackbar.make(ac.findViewById(R.id.layout_switch), "FollowMe 로봇이 10미터 밖에 있습니다.",
-                                        Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                    }
-                                }).show();
-                                toofar = true;
-                            }
+
+                            Snackbar.make(ac.findViewById(R.id.layout_switch), "FollowMe 로봇이 10미터 밖에 있습니다.",
+                                    Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                }
+                            }).show();
+
                             mVibrator.vibrate(
                                     new long[]{100, 1000, 100, 500, 100, 500, 100, 1000}
                                     , 0);
@@ -193,7 +190,6 @@ public class BeaconScanner {
 
         }
         on = false;
-        toofar = true;
     }
 
     boolean isOn() {

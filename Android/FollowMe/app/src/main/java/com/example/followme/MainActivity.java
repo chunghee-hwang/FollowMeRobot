@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        BluetoothComm.getInstance().sendMessage(BluetoothComm.STOP);
         BluetoothComm.getInstance().stop();
         BeaconScanner.getInstance(MainActivity.this).stop(MainActivity.this);
         super.onDestroy();

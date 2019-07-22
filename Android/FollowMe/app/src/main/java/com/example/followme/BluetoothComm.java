@@ -36,7 +36,8 @@ public class BluetoothComm {
     private BluetoothAdapter mBluetoothAdapter;
     public static boolean isConnected;
     private static BluetoothComm mBluetoothComm;
-
+    final static String GO = "GO";
+    final static String STOP = "STOP";
     private BluetoothComm() {
     }
 
@@ -57,6 +58,7 @@ public class BluetoothComm {
                             public Unit invoke() {
                                 try {
                                     ((SwitchActivity) mAc).mFollowToggle.setEnabled(false);
+                                    ((SwitchActivity) mAc).mVibrationToggle.setEnabled(false);
                                     mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                                     if (!isConnected) {
                                         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice("8C:88:2B:00:09:A0");
@@ -110,6 +112,7 @@ public class BluetoothComm {
     }
 
     void stop() {
+
         if (mConnectedTask != null) {
             mConnectedTask.cancel(true);
         }
@@ -200,7 +203,7 @@ public class BluetoothComm {
             Snackbar.make(mAc.findViewById(R.id.layout_switch), mConnectedDeviceName + "에 연결되었습니다", Snackbar.LENGTH_LONG).show();
 
             ((SwitchActivity) mAc).iconOn(R.id.bluetooth);
-            ((SwitchActivity) mAc).mFollowToggle.setEnabled(true);
+//            ((SwitchActivity) mAc).mFollowToggle.setEnabled(true);
         }
         isConnected = true;
 
