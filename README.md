@@ -11,17 +11,23 @@
 ### 소프트웨어 아키텍처
 ![img1.png](./img/img1.png)
 
+### 제품 회로도
+![img2.png](./img/img2.png)
 
+## 제품 사진
+![img3.png](./img/img2.png)
 
+## 사용 기술
+개발환경 | Raspbian, Windows 10
+---- | ---- |
+사용언어 | Java, Python
+사용기술 | OpenCV를 이용한 영상인식, 블루투스 소켓 통신
+개발도구 | Vim, Android Studio, RaspberryPi 3 Model B, Beacon
 
-#### 참고 링크
+## 개발 기간
+2019/04 ~ 2019/07/25
 
-안드로이드 코드(자바)  
-https://webnautes.tistory.com/849  
+## 프로젝트 인원 
+4명
 
-안드로이드 코드에서 수정 사항 
-(port 번호 수정)  
-https://stackoverflow.com/questions/9703779/connecting-to-a-specific-bluetooth-port-on-a-bluetooth-device-using-android  
-
-라즈베리파이 코드 (파이썬 코드)  
-http://makeshare.org/bbs/board.php?bo_table=raspberrypi&wr_id=490  
+## 상세 설명은 ppt 참고
