@@ -46,7 +46,6 @@ public class BeaconScanner {
     }
 
     void init(final Activity ac) {
-
         //beacon 관련 코드 넣기
         mVibrator = (Vibrator) ac.getSystemService(Context.VIBRATOR_SERVICE);
         EstimoteCloudCredentials cloudCredentials =
@@ -59,7 +58,13 @@ public class BeaconScanner {
                     public Unit invoke(Throwable throwable) {
                         if (!throwable.getMessage().contains("Monitoring stopped"))
                             //Toast.makeText(ac, "proximity observer error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                            Snackbar.make(ac.findViewById(R.id.layout_switch), "proximity observer error: " + throwable.getMessage(), Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(ac.findViewById(R.id.layout_switch), "앱 또는 기기 재시작 필요 -  error: " + throwable.getMessage(), Snackbar.LENGTH_INDEFINITE)
+
+                                    .setAction("확인", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                        }
+                                    }).show();
 
                         return null;
                     }
@@ -83,8 +88,12 @@ public class BeaconScanner {
                                 public void onClick(View view) {
                                 }
                             }).show();
-
-                            mVibrator.cancel();
+                            try {
+                                ((SwitchActivity) ac).iconOff(R.id.alertImageView);
+                                mVibrator.cancel();
+                            }catch (Exception e){
+                                Toast.makeText(ac, "onEnter - error: " + e.getMessage(),Toast.LENGTH_SHORT).show();
+                            }
                         }
                         return null;
                     }
@@ -102,10 +111,17 @@ public class BeaconScanner {
                                 public void onClick(View view) {
                                 }
                             }).show();
+                            try {
+                                ((SwitchActivity) ac).iconOn(R.id.alertImageView);
 
-                            mVibrator.vibrate(
-                                    new long[]{100, 1000, 100, 500, 100, 500, 100, 1000}
-                                    , 0);
+                                mVibrator.vibrate(
+                                        new long[]{100, 1000, 100, 500, 100, 500, 100, 1000}
+                                        , 0);
+                            }
+                            catch (Exception e)
+                            {
+                                Toast.makeText(ac, "onExit - error: " + e.getMessage(),Toast.LENGTH_SHORT).show();
+                            }
                         }
                         return null;
                     }

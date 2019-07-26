@@ -25,7 +25,7 @@ public class SwitchActivity extends AppCompatActivity {
     ToggleButton mFollowToggle;
     ToggleButton mVibrationToggle;
     ImageView mBluetoothToggle;
-
+    ImageView mAlertImageView;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private static final int PERMISSIONS_REQUEST_CODE = 1011;
@@ -42,11 +42,12 @@ public class SwitchActivity extends AppCompatActivity {
         mVibrationToggle = findViewById(R.id.vibrate);
         mFollowToggle = findViewById(R.id.follow);
         mBluetoothToggle = findViewById(R.id.bluetooth);
+        mAlertImageView = findViewById(R.id.alertImageView);
         ToggleHandler toggleHandler = new ToggleHandler();
         mVibrationToggle.setOnCheckedChangeListener(toggleHandler);
         mFollowToggle.setOnCheckedChangeListener(toggleHandler);
         mBeaconScanner = BeaconScanner.getInstance(SwitchActivity.this);
-        mCompass = new Compass();
+        mCompass = Compass.getInstance();
 
 
         if(mBeaconScanner.isOn())
@@ -100,7 +101,7 @@ public class SwitchActivity extends AppCompatActivity {
                             mBluetoothComm.sendMessage(BluetoothComm.STOP);
                         }
                         if(mCompass != null)
-                            mCompass.stop();
+                            mCompass.stop(getApplicationContext());
                     }
                     break;
             }
@@ -166,7 +167,8 @@ public class SwitchActivity extends AppCompatActivity {
         }
         else if(id == R.id.follow)
         {
-            if (mFollowToggle != null) {
+            if (mFollowToggle != null)
+            {
                 mFollowToggle.setBackgroundDrawable(getResources().
                         getDrawable(R.drawable.off));
             }
@@ -178,6 +180,15 @@ public class SwitchActivity extends AppCompatActivity {
                 mVibrationToggle.setChecked(false);
             }
         }
+        else if(id == R.id.alertImageView)
+        {
+            if(mAlertImageView!=null)
+            {
+                mAlertImageView.setBackgroundResource(R.drawable.v);
+            }
+        }
+
+
     }
 
     void iconOn(int id)
@@ -202,6 +213,13 @@ public class SwitchActivity extends AppCompatActivity {
                 mVibrationToggle.setBackgroundDrawable(getResources().
                         getDrawable(R.drawable.on));
                 mVibrationToggle.setChecked(true);
+            }
+        }
+        else if(id == R.id.alertImageView)
+        {
+            if(mAlertImageView!=null)
+            {
+                mAlertImageView.setBackgroundResource(R.drawable.v_alert);
             }
         }
     }

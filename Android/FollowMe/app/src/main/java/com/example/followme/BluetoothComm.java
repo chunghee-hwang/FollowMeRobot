@@ -331,7 +331,7 @@ public class BluetoothComm {
                     mAc.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(mAc, "에러 : 서버가 다운되었습니다!", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(mAc, "에러 : 서버가 다운되었습니다!", Toast.LENGTH_SHORT).show();
                             cancel(true);
                             ((SwitchActivity) mAc).iconOff(R.id.bluetooth);
                         }

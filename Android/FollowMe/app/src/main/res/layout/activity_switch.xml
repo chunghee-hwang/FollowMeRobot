@@ -71,14 +71,16 @@
             android:layout_weight="0.3">
 
             <ImageView
-                android:id="@+id/imageView2"
+                android:id="@+id/alertImageView"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_weight="1"
-                android:background="#00FFFFFF"
-                android:paddingTop="20dp"
+                android:background="@drawable/v"
+                android:paddingTop="20dp">
 
-                android:src="@drawable/v" />
+            </ImageView>
+
+                <!--android:src="@drawable/v" />-->
 
             <ToggleButton
                 android:id="@+id/vibrate"
