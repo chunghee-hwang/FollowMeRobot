@@ -7,11 +7,11 @@ def acceptClient(server_socket):
     print("Accepted connection from ",address)
     return client_socket
 
-def start_server(r,g,b,r2,g2,b2, gostop, direction):
+def start_server(r,g,b,r2,g2,b2, gostop, direction, colorchanged):
     print('start server!!')
 
     #페어링 동작 재시작
-    os.system("sudo systemctl restart AutoPair.service")
+    #os.system("sudo systemctl restart AutoPair.service")
 
     #내장된 블루투스 안테나 스위치 끄기
     #os.system("sudo systemctl disable hciuart")
@@ -43,7 +43,7 @@ def start_server(r,g,b,r2,g2,b2, gostop, direction):
         #print("Received: %s" % msg)
         #msg가 int인지 확인한 후 에러가 뜨지 않으면 try가 계속 실행되어 r 프로세스에 msg가 넘어가서 rgb가 들어감.
         #int(msg)에서 에러가 뜨면 except ValueError로 들어가고 방향 전환 프로세스에 msg가 넘어감
-        print(msg)
+        #print(msg)
         try:
             int(msg)
             rgbStr = str(msg)
@@ -53,21 +53,23 @@ def start_server(r,g,b,r2,g2,b2, gostop, direction):
             r2.value=int(rgbStr[9:12])
             g2.value=int(rgbStr[12:15])
             b2.value=int(rgbStr[15:18])
-
-            print("RGB 받음")
+            colorchanged.value = 1
+            #print("RGB 받음")
         except ValueError:
-            print("명령 받음")
-            print('msg:', msg)
+            #print("명령 받음")
+            #print('direction:', msg)
             if msg.startswith('GO'):
                 gostop.value = 1
             elif msg.startswith('STOP'):
                 gostop.value = 0
-            elif msg.startswith('STRAIGHT'):
-                direction.value = 0
+            #elif msg.startswith('STRAIGHT'):
+            #   direction.value = 0
             elif msg.startswith('LEFT'):
                 direction.value = -1
+                #print('LEFT')
             elif msg.startswith('RIGHT'):
                 direction.value = 1
+                #print('RIGHT')
                 
     server_socket.close() # 블루투스 서버 소켓 닫음
-    os.system("sudo systemctl restart AutoPair.service")
+    #os.system("sudo systemctl restart AutoPair.service")

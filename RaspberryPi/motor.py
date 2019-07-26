@@ -52,14 +52,14 @@ pwmB = setPinConfig(ENB, IN3, IN4)
 
 
 def forward_1():
-    setMotor(CH1, 45, FORWARD)
-    setMotor(CH2, 45, FORWARD)
+    setMotor(CH1, 60, FORWARD)
+    setMotor(CH2, 60, FORWARD)
     time.sleep(0.01)
     #print("slow forward")
 
 def forward_2():
-    setMotor(CH1, 60, FORWARD)
-    setMotor(CH2, 60, FORWARD)
+    setMotor(CH1, 80, FORWARD)
+    setMotor(CH2, 80, FORWARD)
     time.sleep(0.01)
     #print("fast forward")
 
@@ -81,25 +81,16 @@ def stop():
     #print("stop")
 
 def turnLeft():
-    setMotor(CH1, 45, BACKWARD)
-    setMotor(CH2, 45, FORWARD)
+    setMotor(CH1, 60, BACKWARD)
+    setMotor(CH2, 60, FORWARD)
     time.sleep(0.01)
     #print("left")
 
 def turnRight():
-    setMotor(CH1, 45, FORWARD)
-    setMotor(CH2, 45, BACKWARD)
+    setMotor(CH1, 60, FORWARD)
+    setMotor(CH2, 60, BACKWARD)
     time.sleep(0.01)
     #print("right")
-
-
-def leftturn2():
-    setMotor(CH1, 20, FORWARD)
-    setMotor(CH2, 45, FORWARD)
-
-def rightturn2():
-    setMotor(CH1, 45, FORWARD)
-    setMotor(CH2, 20, FORWARD)
 
 # 모터 제어 함수
 def setMotorContorl(pwm, INA, INB, speed, stat):
