@@ -38,8 +38,7 @@ def camera_func(r,g,b,r2,g2,b2,gostop,direction, colorchanged):
     #camera.set(cv2.CAP_PROP_SATURATION, saturation)
     #camera.set(cv2.CAP_PROP_EXPOSURE, exposure)
     #블루투스서버로 보내준 r로 rgb값 받음
-    #print('camera_func - r: ',r.value,'g:',g.value,'b:',b.value)
-    #이게 upper인데 바꾸는게 더 귀찮아서 그냥 둠. 이게 upper
+
     interrupted = False
     try:
       while interrupted == False:         
